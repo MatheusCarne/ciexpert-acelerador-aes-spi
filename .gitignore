@@ -1,0 +1,10 @@
+sim_build/
+csrc/
+simv.daidir/
+*.log
+*.key
+*.vpd
+*.fsdb
+vc_hdrs.h
+verdiLog/
+novas*
