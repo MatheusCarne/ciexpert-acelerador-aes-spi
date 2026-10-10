@@ -20,6 +20,8 @@ O sistema de topo (`AES TOP-LEVEL SYSTEM`) integra os seguintes subsistemas prin
 
 Certifique-se de que os módulos e variáveis de ambiente das ferramentas Synopsys (**VCS**, **Verdi**, **SpyGlass**) estejam carregados no terminal.
 
+## O que o Teste Mínimo Valida:
+O ambiente utiliza o módulo dummy_top.sv e o testbench tb_dummy_top.sv para executar uma máscara XOR de 128 bits com verificação automática (self-checking), simulando o comportamento básico do estágio AddRoundKey do AES e validando a integração com o compilador Synopsys VCS.
 ### Compilação e Simulação Mínima
 Para checar o ambiente e rodar o fluxo completo em um único comando:
 ```bash
