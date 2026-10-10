@@ -2,6 +2,8 @@
 // Módulo Dummy com Operação XOR (128-bit)
 // Demonstração da etapa AddRoundKey antes da implementação completa do AES
 // ==============================================================================
+`timescale 1ns/1ps
+
 module dummy_top (
     input  logic         clk,
     input  logic         rst_n,
