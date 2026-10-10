@@ -24,3 +24,9 @@ Certifique-se de que os módulos e variáveis de ambiente das ferramentas Synops
 Para checar o ambiente e rodar o fluxo completo em um único comando:
 ```bash
 make
+
+Comandos do Makefile
+make sim      # Compila o RTL/Testbench e executa a simulação via Synopsys VCS.
+make lint     # Executa a análise estática de código (Linting) via Synopsys SpyGlass.
+make wave     # Abre a forma de onda gerada (.fsdb) na interface do Synopsys Verdi.
+make clean    # Remove diretórios temporários, logs e binários gerados pela compilação.
