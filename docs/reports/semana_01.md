@@ -46,14 +46,16 @@ A automação do ambiente foi testada diretamente no terminal do servidor via co
 
 ### Log de Sucesso da Simulação (Synopsys VCS):
 ```text
-==> Compilando com Synopsys VCS...
-Chronologic VCS (TM) Version X-2025.06-SP2_Full64
-Parsing design file 'rtl/dummy_top.sv'
-Parsing design file 'tb/tb_dummy_top.sv'
+==================================================
+[TEST] Entrada  (Data) : 0x0123456789abcdef0123456789abcdef
+[TEST] Chave    (Key)  : 0xfedcba9876543210fedcba9876543210
+[TEST] Resultado (XOR) : 0xffffffffffffffffffffffffffffffff
+[SUCCESS] Operacao XOR de 128 bits Validada!
+==================================================
 
-==> Executando Simulação...
-==========================================
-[SUCCESS] Ambiente Synopsys (VCS) configurado!
-==========================================
-$finish called from file "tb/tb_dummy_top.sv", line 28.
-Time: 70
+$finish called from file "tb/tb_dummy_top.sv", line 67.
+$finish at simulation time                60000
+           V C S   S i m u l a t i o n   R e p o r t
+Time: 60000 ps
+CPU Time:      0.380 seconds;       Data structure size:   0.0Mb
+Sat Oct 10 16:07:04 2026
