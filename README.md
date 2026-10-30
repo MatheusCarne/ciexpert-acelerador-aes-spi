@@ -1,5 +1,10 @@
 # Acelerador AES com Interface SPI e Baixo Consumo
 
+[![Language: SystemVerilog](https://img.shields.io/badge/Language-SystemVerilog-blue.svg)](https://en.wikipedia.org/wiki/SystemVerilog)
+[![PDK: Synopsys SAED 32nm](https://img.shields.io/badge/PDK-Synopsys_SAED32nm-orange.svg)](#2-ambiente-de-desenvolvimento)
+[![EDA: Synopsys Toolchain](https://img.shields.io/badge/EDA-Synopsys_VCS_%7C_DC_%7C_Formality-red.svg)](#2-ambiente-de-desenvolvimento)
+[![Automation: GNU Make](https://img.shields.io/badge/Build-GNU_Make-green.svg)](#3-comandos-de-geração-e-automação)
+
 IP digital de um acelerador de criptografia AES-128 com interface de controle SPI, barramento de dados para memória e suporte a técnicas de baixo consumo (*Low Power / UPF*). Desenvolvido no âmbito do projeto **Hands-on — RTL Design Track** (MiniSoC AES, v1.0.0).
 
 ---
