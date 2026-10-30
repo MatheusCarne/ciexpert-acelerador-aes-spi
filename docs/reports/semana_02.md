@@ -42,8 +42,6 @@ O testbench compara contra um modelo de referência **independente** (inverso po
 
 Os vetores da rodada 10 foram obtidos de um AES-128 completo em Python, que reproduz o ciphertext do Apêndice B (`3925841d02dc09fbdc118597196a0b32`).
 
-**Resultado (iverilog 12, ambiente de desenvolvimento):** 6268 checks, 0 erros, `TEST PASSED`.
-
 **Teste de mutação:** trocar o sentido do ShiftRows gerou 4004 erros; alterar uma única entrada da S-box (`53→EC`) foi detectada. O testbench realmente pega falhas.
 
 **Resultado no VCS (X-2025.06-SP2, servidor):** 6268 checks, 0 erros, `TEST PASSED`.
@@ -64,9 +62,9 @@ CPU Time:      0.410 seconds;       Data structure size:   0.0Mb
 == RESULTADO: PASS ==
 ```
 
-## 4. Dúvidas / pontos a confirmar com o professor
+## 4. Dúvidas / pontos a confirmar
 
-1. Confirmar que a convenção byte 0 em `[127:120]` vale também para a ordem dos registradores KEY0–3 (Word 0 = `[127:96]`) na saída do key expansion.
+1. Se a convenção byte 0 em `[127:120]` vale também para a ordem dos registradores KEY0–3 (Word 0 = `[127:96]`) na saída do key expansion.
 2. A S-box será mantida como tabela (case) ou o professor prefere a versão por GF(2^8) calculada, visando área na síntese da Semana 8?
 3. InvSubBytes / InvShiftRows são necessários já no v1.0 (decifragem em ECB/CBC) ou só quando os modos forem implementados?
 
