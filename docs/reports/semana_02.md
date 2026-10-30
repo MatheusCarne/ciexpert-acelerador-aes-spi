@@ -13,7 +13,7 @@
 | `scripts/run_all.sh` | Comando único: regenera S-box, compila e simula |
 | `tools/gen_sbox.py` | Calcula a S-box por GF(2^8): inverso + transformação afim |
 
-Execução: `./scripts/run_all.sh` (usa VCS se disponível, senão iverilog).
+Execução: `./scripts/run_all.sh` (usa VCS).
 
 ## 2. Decisões de projeto
 
