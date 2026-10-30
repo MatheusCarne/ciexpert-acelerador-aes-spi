@@ -2,8 +2,6 @@
 
 Bem-vindo ao repositório do **IP Acelerador AES-128 (MiniSoC AES)**. Este documento estabelece as diretrizes de cooperação e integração entre o desenvolvimento RTL e a equipe de Design Verification (DV).
 
-
-
 ## 📌 Regras de Acesso e Entregas (Handshake via Tags)
 
 1. **Acesso Exclusivo por Tags Congeladas:** A verificação funcional e a regressão devem ser executadas exclusivamente sobre as **Git Tags oficiais** do projeto. Não execute testes de aceitação sobre commits intermediários da branch `main`.
@@ -15,7 +13,6 @@ Bem-vindo ao repositório do **IP Acelerador AES-128 (MiniSoC AES)**. Este docum
    - Compilação e simulação padrão: `make sim`
    - Abertura de formas de onda no Verdi: `make wave`
    - Limpeza de artefatos temporários: `make clean`
-
 
 ## 🐛 Fluxo de Reporte e Resolução de Bugs
 
@@ -52,6 +49,28 @@ Para garantir o reaproveitamento dos seus VIPs e do ambiente de teste, o top-lev
 
 Utilize commits semânticos vinculando as alterações à Issue correspondente:
 
-```bash
-git commit -m "fix(spi): corrige atraso de amostragem no frame de leitura (closes #12)"
+`git commit -m "fix(spi): corrige atraso de amostragem no frame de leitura (closes #12)"`
+
+<details>
+<summary>🏷️ <b>Mapeamento Completo de Git Tags por Semana e Handshake DV</b> (Clique para expandir)</summary>
+
+<br/>
+
+> 💡 **Nota de Integração:** Nas Semanas **7**, **10** e **12**, **terá duas tags no mesmo commit**: a tag semanal do repositório RTL e a tag padrão esperada pelo verificador parceiro (`rtl-v1.0`, `rtl-v1.1`, `rtl-v2.0`).
+
+| Semana | Foco / Descrição do Entregável | Tag Semanal (RTL) | Tag Oficial DV (Handshake) | Release / Milestone GitHub |
+| :---: | :--- | :--- | :--- | :--- |
+| **W01** | Kick-off, estudo e ambiente de simulação | `w01-environment-v1.0` | — | — |
+| **W02** | SubBytes, ShiftRows e S-box + testbench | `w02-subbytes-shiftrows-v1.0` | — | — |
+| **W03** | Microarquitetura, MixColumns e transformações inversas | `w03-architecture-v1.0` | — | `W01-W03: Environment & Architecture Freeze` |
+| **W04** | Expansão de chave e datapath AES-128 | `w04-keyexp-datapath-v1.0` | — | — |
+| **W05** | SPI front-end, registradores e PLL mock | `w05-spi-pll-v1.0` | — | — |
+| **W06** | AES engine (ECB, CBC, CTR) e memória compartilhada | `w06-aes-engine-mem-v1.0` | — | — |
+| **W07** | **Top-level integrado e RTL v1.0** | `w07-rtl-v1.0` |  **`rtl-v1.0`** | `W04-W07: RTL v1.0 (First Handshake DV)` |
+| **W08** | Síntese inicial e baseline SDC | `w08-synthesis-baseline-v1.0` | — | — |
+| **W09** | Verificação formal de equivalência (Formality) | `w09-formal-v1.0` | — | — |
+| **W10** | **Fechamento funcional (6 modos) e RTL v1.1** | `w10-rtl-v1.1` |  **`rtl-v1.1`** | `W08-W10: RTL v1.1 (Functional Freeze)` |
+| **W11** | Arquitetura de energia e UPF | `w11-upf-power-arch-v1.0` | — | — |
+| **W12** | **Power Gating, Clock Gating e RTL v2.0** | `w12-rtl-v2.0` |  **`rtl-v2.0`** | — |
+| **W13** | Síntese Low Power e apresentação final | `w13-final-release-v2.0` | — | `W11-W13: RTL v2.0 (Final Low Power IP Release)` |
 
