@@ -8,11 +8,31 @@ Bem-vindo ao repositório do **IP Acelerador AES-128 (MiniSoC AES)**. Este docum
 2. **Duplicidade de Tags para Mapeamento:** Para manter o histórico semanal e atender à especificação de DV, os commits de entrega contêm **duas tags equivalentes**:
    - **Tag Interna/Semanal:** `w07-top-integration-v1.0`, `w10-all-modes-v1.1`, `w12-low-power-v2.0`
    - **Tag Oficial DV (Checkout de Verificação):** `rtl-v1.0`, `rtl-v1.1`, `rtl-v2.0`
-   > *Exemplo de checkout:* `git checkout rtl-v1.0`
+   > *Semanas e Git Tags no fim do arquivo*
 3. **Ambiente Reprodutível (Synopsys VCS & Verdi):**
    - Compilação e simulação padrão: `make sim`
    - Abertura de formas de onda no Verdi: `make wave`
    - Limpeza de artefatos temporários: `make clean`
+
+## 📥 Como o Verificador Parceiro Acessa o Código Congelado
+
+O verificador parceiro pode obter a versão exata do IP de duas formas:
+
+#### Opção A: Via Terminal Git (Recomendado para Simulação)
+No repositório clonado localmente, atualize as tags e faça o *checkout* da versão pretendida:
+```bash
+# 1. Atualiza todas as tags do repositório remoto
+git fetch --tags
+
+# 2. Alterna para o estado estático da release de verificação
+git checkout rtl-v1.0
+```
+*Nota:* Isso garante que a árvore de arquivos fique posicionada no commit exato da entrega, pronta para executar os scripts de simulação via `make sim` no ambiente Synopsys VCS sem alterar o código RTL.
+
+#### Opção B: Via Interface Web do GitHub (Releases / Tags)
+1. Acesse a aba **Releases** ou **Tags** na página principal do repositório.
+2. Localize a release desejada (ex.: `W07: RTL v1.0 (First Handshake DV)`).
+3. Faça o download do pacote estático em `.zip` ou `.tar.gz`, ou inspecione a árvore de arquivos diretamente na interface.
 
 ## 🐛 Fluxo de Reporte e Resolução de Bugs
 
@@ -45,12 +65,49 @@ Para garantir o reaproveitamento dos seus VIPs e do ambiente de teste, o top-lev
 | **`rtl-v1.1`** | 08/01/2027 | Suporte completo aos **6 modos** (ECB, CBC, CTR, PCBC, CFB, OFB) e correções da v1.0. | Funcionalidade completa sem Low Power. |
 | **`rtl-v2.0`** | 22/01/2027 | Arquitetura Low Power (Power Gating / UPF / Clock Gating) para regressão funcional. | Foco em regressão (o teste de UPF é feito em RTL). |
 
+## 📋 Acompanhamento de Tarefas via GitHub Projects
+
+O desenvolvimento do **MiniSoC AES** utiliza o **GitHub Projects** (Quadro Kanban) para a gestão do backlog e acompanhamento do progresso das 13 semanas.
+
+### 🔄 Colunas do Quadro (Board)
+As tarefas e entregáveis estão organizados nas quatro colunas oficiais do quadro:
+
+1. **Pendente:** Tarefas e entregáveis que ainda não foram iniciados (backlog do projeto).
+2. **Em Progresso:** Módulos RTL, testbenches ou documentos em desenvolvimento ativo.
+3. **Em Review:** Entregas congeladas em tag oficial (ex.: `rtl-v1.0`) que estão sob análise e simulação de regressão do **verificador parceiro**.
+4. **Feito:** Tarefas e entregáveis com critérios de aceite atendidos e verificados.
+
+> 🤝 **Autonomia do Verificador Parceiro:** Assim que o verificador concluir a suíte de testes de simulação e regressão sobre uma tag de entrega (ex.: `rtl-v1.0`, `rtl-v1.1`), ele mesmo deve mover a respectiva Issue/Card da coluna **Em Review** diretamente para **Feito**, ou voltar para **Em Progresso** relatando o bug.
+
+---
+
+### 🎯 Vinculação por Milestones (Marcos do Projeto)
+
+Todas as **Issues** do quadro estão vinculadas aos quatro marcos principais do repositório:
+
+- 📌 **M1: Architecture Freeze & Kick-off (Semanas 1 a 3):** Ambiente, microarquitetura v1.0 e transformações de rodada.
+- 📌 **M2: RTL Freeze v1.0 / Handshake DV (Semanas 4 a 7):** Datapath, SPI, PLL, registradores e modos ECB, CBC e CTR.
+- 📌 **M3: Baseline Synthesis & Formal Equivalence (Semanas 8 a 10):** Restrições SDC, síntese lógica, equivalência formal (Formality) e fechamento dos 6 modos (v1.1).
+- 📌 **M4: Low Power RTL v2.0 & Final Release (Semanas 11 a 13):** Arquitetura UPF, Power Gating, Clock Gating e encerramento final.
+
+---
+
+### 🏷️ Labels para Classificação
+
+- `feature`: Novas funcionalidades ou módulos RTL em desenvolvimento.
+- `bug`: Defeitos funcionais, erros de protocolo SPI ou falhas de simulação.
+- `rtl`: Alterações e códigos no diretório `rtl/`.
+- `architecture` / `documentation`: Documentos de microarquitetura e relatórios semanais.
+- `synthesis/eda`: Scripts Tcl, arquivos SDC, síntese (Design Compiler) e Formality.
+- `low-power`: Implementações UPF, power gating e clock gating.
+
 ## 🏷️ Padrão de Commit para Rastreabilidade
 
 Utilize commits semânticos vinculando as alterações à Issue correspondente:
 
 `git commit -m "fix(spi): corrige atraso de amostragem no frame de leitura (closes #12)"`
 
+---
 <details>
 <summary>🏷️ <b>Mapeamento Completo de Git Tags por Semana e Handshake DV</b> (Clique para expandir)</summary>
 
