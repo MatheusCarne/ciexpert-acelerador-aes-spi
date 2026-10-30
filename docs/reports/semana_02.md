@@ -46,12 +46,23 @@ Os vetores da rodada 10 foram obtidos de um AES-128 completo em Python, que repr
 
 **Teste de mutação:** trocar o sentido do ShiftRows gerou 4004 erros; alterar uma única entrada da S-box (`53→EC`) foi detectada. O testbench realmente pega falhas.
 
-**Resultado no VCS (X-2025.06-SP2):** ```text Chronologic VCS simulator ... X-2025.06-SP2_Full64
+**Resultado no VCS (X-2025.06-SP2, servidor):** 6268 checks, 0 erros, `TEST PASSED`.
+
+```
+Chronologic VCS simulator copyright 1991-2025
+Compiler version X-2025.06-SP2_Full64; Runtime version X-2025.06-SP2_Full64;  Oct 29 21:01 2026
 [INFO] S-box: 256 entradas verificadas
 [INFO] Vetores FIPS-197 Apendice B (rodadas 1 e 10) verificados
 [INFO] 2000 estados aleatorios verificados
+----------------------------------------
 Checks: 6268  Erros: 0
 TEST PASSED
+$finish called from file "tb/tb_semana02.sv", line 148.
+$finish at simulation time              2265000
+Time: 2265000 ps
+CPU Time:      0.410 seconds;       Data structure size:   0.0Mb
+== RESULTADO: PASS ==
+```
 
 ## 4. Dúvidas / pontos a confirmar com o professor
 
