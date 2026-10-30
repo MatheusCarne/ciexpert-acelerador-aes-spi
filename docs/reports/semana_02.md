@@ -69,7 +69,6 @@ CPU Time:      0.410 seconds;       Data structure size:   0.0Mb
 1. Confirmar que a convenção byte 0 em `[127:120]` vale também para a ordem dos registradores KEY0–3 (Word 0 = `[127:96]`) na saída do key expansion.
 2. A S-box será mantida como tabela (case) ou o professor prefere a versão por GF(2^8) calculada, visando área na síntese da Semana 8?
 3. InvSubBytes / InvShiftRows são necessários já no v1.0 (decifragem em ECB/CBC) ou só quando os modos forem implementados?
-4. A S-box é compartilhada (1 instância iterativa) ou há 16 em paralelo por rodada? Isso impacta latência e área na microarquitetura da Semana 3.
 
 ## 5. Próximos passos (Semana 3, 06/11)
 
