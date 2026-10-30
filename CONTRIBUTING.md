@@ -6,14 +6,15 @@ Bem-vindo ao repositório do **IP Acelerador AES-128 (MiniSoC AES)**. Este docum
 
 ## 📌 Regras de Acesso e Entregas (Handshake via Tags)
 
-1. **Acesso Exclusivo por Tags Congeladas:** A verificação funcional deve ser executada exclusivamente sobre as **Git Tags oficiais** do projeto. Não execute simulações de regressão sobre commits intermediários da branch `main`.
-2. **Duplicidade de Tags para Mapeamento:** Para manter o histórico semanal organizado e atender à especificação de DV, os commits de entrega contêm **duas tags equivalentes**:
+1. **Acesso Exclusivo por Tags Congeladas:** A verificação funcional e a regressão devem ser executadas exclusivamente sobre as **Git Tags oficiais** do projeto. Não execute testes de aceitação sobre commits intermediários da branch `main`.
+2. **Duplicidade de Tags para Mapeamento:** Para manter o histórico semanal e atender à especificação de DV, os commits de entrega contêm **duas tags equivalentes**:
    - **Tag Interna/Semanal:** `w07-top-integration-v1.0`, `w10-all-modes-v1.1`, `w12-low-power-v2.0`
    - **Tag Oficial DV (Checkout de Verificação):** `rtl-v1.0`, `rtl-v1.1`, `rtl-v2.0`
-   > *Nota:* Você pode usar o comando `git checkout rtl-v1.0` diretamente.
-3. **Ambiente Reprodutível:** O ambiente de simulação utiliza **Synopsys VCS** e **Verdi**. Para compilar e rodar a simulação a partir da raiz, utilize:
-   ```bash
-   make sim
+   > *Exemplo de checkout:* `git checkout rtl-v1.0`
+3. **Ambiente Reprodutível (Synopsys VCS & Verdi):**
+   - Compilação e simulação padrão: `make sim`
+   - Abertura de formas de onda no Verdi: `make wave`
+   - Limpeza de artefatos temporários: `make clean`
 
 
 ## 🐛 Fluxo de Reporte e Resolução de Bugs
@@ -21,11 +22,14 @@ Bem-vindo ao repositório do **IP Acelerador AES-128 (MiniSoC AES)**. Este docum
 Ao identificar divergências funcionais, violações de timing, violações de protocolo SPI ou erros de checagem:
 
 1. **Abertura de Issue:** Acesse a aba **Issues** $\rightarrow$ **New Issue** e selecione o template **🐛 Bug Report (RTL / DV)**.
-2. **Evidências:** Inclua a Tag testada, o comando de execução, os logs do VCS e a referência do sinal no Verdi/FSDB.
-3. **Classificação pelo RTL Designer:**
-   - **Defeito no RTL:** O erro é corrigido na branch local e uma nova tag de patch é gerada.
-   - **Defeito no Ambiente DV:** O cenário é comunicado na Issue para ajuste no Testbench.
-   - **Ambiguidade na Spec:** O ponto é documentado e levado ao instrutor/orientador.
+2. **Evidências Obrigatórias:**
+   - Tag testada (ex: `rtl-v1.0`).
+   - Semente randômica (*seed*) e comando exato para reprodução.
+   - Arquivo de log da simulação e referência de forma de onda no Verdi (`.fsdb`).
+3. **Classificação da Issue (feita pelo RTL Designer):**
+   - **Defeito no RTL:** Erro corrigido na branch de desenvolvimento; nova tag de correção gerada (ex: `rtl-v1.0.1`).
+   - **Defeito no Ambiente DV:** Ajuste de VIP ou Testbench alinhado diretamente na Issue.
+   - **Ambiguidade na Espec:** Submetido ao instrutor/orientador para esclarecimento.
 
 ## 🛠️ Especificação de Topo e Modelos de Integração
 
@@ -46,8 +50,8 @@ Para garantir o reaproveitamento dos seus VIPs e do ambiente de teste, o top-lev
 
 ## 🏷️ Padrão de Commit para Rastreabilidade
 
-Ao submeter correções ou interagir no repositório, faça referência à Issue correspondente na mensagem do commit:
+Utilize commits semânticos vinculando as alterações à Issue correspondente:
 
 ```bash
-git commit -m "fix(aes_dp): corrige ordem dos bytes no ShiftRows"
+git commit -m "fix(spi): corrige atraso de amostragem no frame de leitura (closes #12)"
 
