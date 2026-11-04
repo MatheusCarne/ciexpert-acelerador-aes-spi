@@ -1,8 +1,5 @@
 // ============================================================================
-// minisoc_aes_sbox.sv
-// S-box do AES (FIPS-197, Fig. 7): inverso multiplicativo em GF(2^8)
-// (x^8+x^4+x^3+x+1) seguido da transformacao afim. Combinacional, 8 -> 8.
-// ARQUIVO GERADO por tools/gen_sbox.py -- nao editar a tabela manualmente.
+// minisoc_aes_sbox.sv -- S-box direta do AES (FIPS-197)
 // ============================================================================
 module minisoc_aes_sbox (
   input  logic [7:0] data_i,
