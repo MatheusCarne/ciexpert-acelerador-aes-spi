@@ -47,7 +47,7 @@ module minisoc_aes_inv_mix_columns (
       assign state_o[127 - 8*(4*c + 0) -: 8] = mul_e(b0) ^ mul_b(b1) ^ mul_d(b2) ^ mul_9(b3);
       assign state_o[127 - 8*(4*c + 1) -: 8] = mul_9(b0) ^ mul_e(b1) ^ mul_b(b2) ^ mul_d(b3);
       assign state_o[127 - 8*(4*c + 2) -: 8] = mul_d(b0) ^ mul_9(b1) ^ mul_e(b2) ^ mul_b(b3);
-      assign state_o[127 - 8*(4*c + 3) -: 8] = mul_b(b0) ^ mul_d(b1) ^ mul_e(b2) ^ mul_2(b3); // mul_e fix
+      assign state_o[127 - 8*(4*c + 3) -: 8] = mul_b(b0) ^ mul_d(b1) ^ mul_9(b2) ^ mul_e(b3);
     end
   endgenerate
 endmodule
