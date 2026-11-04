@@ -4,8 +4,6 @@
 **Data:** 06/11/2026  
 **Especificação de Referência:** Block Guide MiniSoC AES v1.0.0  
 
----
-
 ## 1. Visão Geral da Arquitetura
 O MiniSoC AES é um IP acelerador criptográfico de 128 bits parametrizável por SPI, com acesso a memória compartilhada de $1024 \times 32$ bits.
 
@@ -69,7 +67,6 @@ flowchart LR
     style MC fill:#ffffff,stroke:#333,color:#000
     style OUT fill:#ffffff,stroke:#333,color:#000
 ```
----
 
 ## 3. Máquina de Estados (FSM) do `minisoc_aes_top`
 
@@ -102,8 +99,6 @@ stateDiagram-v2
 - **WRITE_BACK:** Escreve as 4 palavras resultantes *in-place* no mesmo endereço da memória.
 - **DONE:** Incrementa `BLOCKS_DONE`. Se `BLOCKS_DONE == NUM_BLOCKS`, eleva `DONE=1` e retorna a `IDLE`.
 
----
-
 ## 4. Estratégia de Clock Domain Crossing (CDC)
 
 1. **Front-End SPI (`spi_sclk`) $\to$ Clock Always-On (`clk`):**
@@ -111,8 +106,6 @@ stateDiagram-v2
 
 2. **Handshake de Controle `clk` $\to$ `sys_clk`:**
    - O sinal de inicio `START` passa por um sincronizador de borda de 2 estágios antes de disparar a FSM do AES.
-
----
 
 ## 5. Sequência de Reset e Travamento do PLL
 
