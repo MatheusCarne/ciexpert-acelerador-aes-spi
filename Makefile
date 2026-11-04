@@ -1,40 +1,48 @@
-# ==============================================================================
-# Makefile - Projeto Acelerador AES (Trilha RTL - Ambiente Synopsys)
-# ==============================================================================
+# ============================================================================
+# Makefile -- Fluxo de Simulação e Compilação Synopsys (VCS / Verdi / SpyGlass)
+# ============================================================================
 
-# Altera o caractere de indentacao das regras de TAB para '>'
-.RECIPEPREFIX = >
+# Diretórios
+RTL_DIRS := rtl/minisoc_aes rtl/minisoc_mem rtl/minisoc_pll rtl/minisoc_spi rtl
+TB_DIR   := tb
 
-RTL_DIR   := rtl
-TB_DIR    := tb
-SIM_DIR   := sim_build
-REPORTS   := docs/reports
+# Busca todos os arquivos RTL (exclui dummy_top se os módulos reais existirem)
+RTL_SRCS := $(wildcard rtl/minisoc_aes/*.sv) \
+            $(wildcard rtl/minisoc_mem/*.sv) \
+            $(wildcard rtl/minisoc_pll/*.sv) \
+            $(wildcard rtl/minisoc_spi/*.sv) \
+            $(wildcard rtl/*.sv)
 
-RTL_SRCS  := $(wildcard $(RTL_DIR)/*.sv) $(wildcard $(RTL_DIR)/*.v)
-TB_SRCS   := $(wildcard $(TB_DIR)/*.sv) $(wildcard $(TB_DIR)/*.v)
+# Testbench padrão (pode ser sobrescrito: make sim TB=tb/tb_semana03.sv)
+TB ?= tb/tb_semana03.sv
 
-VCS       := vcs
-VERDI     := verdi
-SPYGLASS  := spyglass
+# Flags de Compilação VCS
+VCS_FLAGS := -sverilog -full64 -kdb -debug_access+all \
+             +incdir+rtl/minisoc_aes \
+             -timescale=1ns/1ps
 
-VCS_FLAGS := -sverilog -kdb -debug_access+all -full64 \
-             +incdir+$(RTL_DIR) \
-             -l $(SIM_DIR)/compile.log
+# Target Padrão
+.PHONY: all sim wave lint clean
 
-.PHONY: all help check_env lint sim wave clean
+all: sim
 
-all: check_env sim
+# Compilação e Simulação VCS
+sim:
+	@echo "==> Gerando S-Boxes..."
+	python3 tools/gen_sbox.py rtl/minisoc_aes
+	@echo "==> Compilando com Synopsys VCS..."
+	vcs $(VCS_FLAGS) $(RTL_SRCS) $(TB) -o simv
+	@echo "==> Executando Simulação..."
+	./simv
 
-check_env:
-> @mkdir -p $(RTL_DIR) $(TB_DIR) $(SIM_DIR) $(REPORTS)
+# Visualização no Verdi
+wave:
+	verdi -ssf nova.fsdb &
 
-sim: check_env
-> @echo "==> Compilando com Synopsys VCS..."
-> $(VCS) $(VCS_FLAGS) $(RTL_SRCS) $(TB_SRCS) -o $(SIM_DIR)/simv
-> @echo "==> Executando Simulação..."
-> $(SIM_DIR)/simv -l $(SIM_DIR)/simulation.log
+# Análise Estática com SpyGlass
+lint:
+	spyglass -project spyglass.prj -batch &
 
+# Limpeza de artefatos
 clean:
-> @echo "==> Limpando artefatos de compilação..."
-> rm -rf $(SIM_DIR) csrc simv.daidir ucli.key vc_hdrs.h verdiLog novas* *.fsdb *.log
-> @echo "Limpeza concluída."
+	rm -rf simv* csrc verdiLog ucli.key DVEfiles *.fsdb *.vdb spyglass_reports
