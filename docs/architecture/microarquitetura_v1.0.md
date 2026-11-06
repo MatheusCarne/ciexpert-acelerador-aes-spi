@@ -57,17 +57,17 @@ flowchart TD
 
 ```mermaid
 flowchart LR
-    IN([Estado Inicial<br/>128-bit]) --> ARK[AddRoundKey<br/>XOR com Subchave]
-    ARK --> SB[SubBytes<br/>16x S-Box em paralelo]
+    IN([Estado Inicial<br/>128-bit]) --> SB[SubBytes<br/>16x S-Box em paralelo]
     SB --> SR[ShiftRows<br/>Reroteamento de Fios]
     SR --> MC[MixColumns<br/>Bypass na 10ª Rodada]
-    MC --> OUT([Próximo Estado<br/>128-bit])
+    MC --> ARK[AddRoundKey<br/>XOR com Subchave]
+    ARK --> OUT([Próximo Estado<br/>128-bit])
     
     style IN fill:#ffffff,stroke:#333,color:#000
-    style ARK fill:#ffffff,stroke:#333,color:#000
     style SB fill:#ffffff,stroke:#333,color:#000
     style SR fill:#ffffff,stroke:#333,color:#000
     style MC fill:#ffffff,stroke:#333,color:#000
+    style ARK fill:#ffffff,stroke:#333,color:#000
     style OUT fill:#ffffff,stroke:#333,color:#000
 ```
 ### 2.2 Fluxo Combinacional de Decriptação (Inverse Cipher)
@@ -76,18 +76,16 @@ Quando configurado para decriptação (ex.: ECB/CBC Decrypt), o *datapath* é re
 
 ```mermaid
 flowchart LR
-    IN([Estado Inicial<br/>128-bit]) --> IARK[AddRoundKey<br/>XOR com K10]
-    IARK --> ISR[InvShiftRows<br/>Reordenamento Inverso]
+    IN([Estado Inicial<br/>128-bit]) --> ISR[InvShiftRows<br/>Reordenamento Inverso]
     ISR --> ISB[InvSubBytes<br/>16x InvS-Box]
-    ISB --> ARK2[AddRoundKey<br/>XOR com Subchave]
-    ARK2 --> IMC[InvMixColumns<br/>Bypass na 10ª Rodada]
+    ISB --> ARK[AddRoundKey<br/>XOR com Subchave]
+    ARK --> IMC[InvMixColumns<br/>Bypass na 10ª Rodada]
     IMC --> OUT([Próximo Estado<br/>128-bit])
     
     style IN fill:#ffffff,stroke:#333,color:#000
-    style IARK fill:#ffffff,stroke:#333,color:#000
     style ISR fill:#ffffff,stroke:#333,color:#000
     style ISB fill:#ffffff,stroke:#333,color:#000
-    style ARK2 fill:#ffffff,stroke:#333,color:#000
+    style ARK fill:#ffffff,stroke:#333,color:#000
     style IMC fill:#ffffff,stroke:#333,color:#000
     style OUT fill:#ffffff,stroke:#333,color:#000
 ```
