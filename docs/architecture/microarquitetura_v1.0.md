@@ -53,11 +53,18 @@ flowchart TD
 2. **Expansão de Chave (`minisoc_aes_key_exp`):**
    - As 11 *round keys* (144 bytes) são pré-computadas na inicialização e armazenadas em registradores internos durante a fase de setup, eliminando a latência de cálculo *on-the-fly* nas operações multiblocos.
 
+3. **Ciclo de Carregamento (Ciclo 0 - AddRoundKey Inicial):**
+   - A norma FIPS-197 exige um `AddRoundKey` inicial antes do início das 10 rodadas iterativas. Na nossa arquitetura iterativa, esta operação não consome ciclos do loop principal. Ela é executada combinacionalmente no **Ciclo 0**, atuando como multiplexador de entrada para o registrador de estado.
+   - **Em Cifragem:** XOR do bloco original com a chave $K_0$.
+   - **Em Decriptação:** XOR do bloco original com a chave $K_{10}$.
+
 ### 2.1 Fluxo Combinacional de Cifragem (Cipher)
+
+O diagrama abaixo ilustra o fluxo combinacional puro que ocorre *dentro* do loop principal (Rodadas 1 a 10). O `AddRoundKey` inicial ($K_0$) já foi aplicado no Ciclo 0.
 
 ```mermaid
 flowchart LR
-    IN([Estado Inicial<br/>128-bit]) --> SB[SubBytes<br/>16x S-Box em paralelo]
+    IN([Estado Inicial da Rodada<br/>128-bit]) --> SB[SubBytes<br/>16x S-Box em paralelo]
     SB --> SR[ShiftRows<br/>Reroteamento de Fios]
     SR --> MC[MixColumns<br/>Bypass na 10ª Rodada]
     MC --> ARK[AddRoundKey<br/>XOR com Subchave]
@@ -72,11 +79,11 @@ flowchart LR
 ```
 ### 2.2 Fluxo Combinacional de Decriptação (Inverse Cipher)
 
-Quando configurado para decriptação (ex.: ECB/CBC Decrypt), o *datapath* é reconfigurado via multiplexadores para utilizar os módulos inversos. As chaves pré-computadas são consumidas na ordem reversa ($K_{10} \to K_0$).
+O diagrama ilustra o loop iterativo que consome as chaves em ordem decrescente ($K_9 \to K_0$). O AddRoundKey inicial ($K_{10}$) já foi aplicado no Ciclo 0.
 
 ```mermaid
 flowchart LR
-    IN([Estado Inicial<br/>128-bit]) --> ISR[InvShiftRows<br/>Reordenamento Inverso]
+    IN([Estado Inicial da Rodada<br/>128-bit]) --> ISR[InvShiftRows<br/>Reordenamento Inverso]
     ISR --> ISB[InvSubBytes<br/>16x InvS-Box]
     ISB --> ARK[AddRoundKey<br/>XOR com Subchave]
     ARK --> IMC[InvMixColumns<br/>Bypass na 10ª Rodada]
@@ -98,7 +105,9 @@ stateDiagram-v2
     
     IDLE --> READ_BLOCK : START = 1
     READ_BLOCK --> KEY_EXPAND : Leitura de 4 palavras concluída
-    KEY_EXPAND --> ROUND_LOOP : Subchaves pré-computadas
+    KEY_EXPAND --> LOAD_CYCLE : Subchaves pré-computadas
+    
+    LOAD_CYCLE --> ROUND_LOOP : Ciclo 0 (AddRoundKey Inicial)
     
     ROUND_LOOP --> ROUND_LOOP : Iteração da rodada (ciclos 1 a 9)
     ROUND_LOOP --> WRITE_BACK : Rodada 10 concluída (Bypass MixColumns)
