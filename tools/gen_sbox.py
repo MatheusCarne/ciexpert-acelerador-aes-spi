@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+#O script tools/gen_sbox.py tem uma única responsabilidade: gerar o mapeamento estático byte a byte para as tabelas 
+#minisoc_aes_sbox.sv e minisoc_aes_inv_sbox.sv baseando-se na matemática de $GF(2^8)$.
 """Gera minisoc_aes_sbox.sv e minisoc_aes_inv_sbox.sv a partir da matemática de GF(2^8)."""
 import os, sys
 
