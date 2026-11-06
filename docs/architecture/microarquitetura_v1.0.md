@@ -52,12 +52,15 @@ flowchart TD
 
 2. **Expansão de Chave (`minisoc_aes_key_exp`):**
    - As 11 *round keys* (144 bytes) são pré-computadas na inicialização e armazenadas em registradores internos durante a fase de setup, eliminando a latência de cálculo *on-the-fly* nas operações multiblocos.
+
+### 2.1 Fluxo Combinacional de Cifragem (Cipher)
+
 ```mermaid
 flowchart LR
     IN([Estado Inicial<br/>128-bit]) --> ARK[AddRoundKey<br/>XOR com Subchave]
     ARK --> SB[SubBytes<br/>16x S-Box em paralelo]
     SB --> SR[ShiftRows<br/>Reroteamento de Fios]
-    SR --> MC[MixColumns<br/>Multiplicação GF 2^8]
+    SR --> MC[MixColumns<br/>Bypass na 10ª Rodada]
     MC --> OUT([Próximo Estado<br/>128-bit])
     
     style IN fill:#ffffff,stroke:#333,color:#000
@@ -67,7 +70,27 @@ flowchart LR
     style MC fill:#ffffff,stroke:#333,color:#000
     style OUT fill:#ffffff,stroke:#333,color:#000
 ```
+### 2.2 Fluxo Combinacional de Decriptação (Inverse Cipher)
 
+Quando configurado para decriptação (ex.: ECB/CBC Decrypt), o *datapath* é reconfigurado via multiplexadores para utilizar os módulos inversos. As chaves pré-computadas são consumidas na ordem reversa ($K_{10} \to K_0$).
+
+```mermaid
+flowchart LR
+    IN([Estado Inicial<br/>128-bit]) --> IARK[AddRoundKey<br/>XOR com K10]
+    IARK --> ISR[InvShiftRows<br/>Reordenamento Inverso]
+    ISR --> ISB[InvSubBytes<br/>16x InvS-Box]
+    ISB --> ARK2[AddRoundKey<br/>XOR com Subchave]
+    ARK2 --> IMC[InvMixColumns<br/>Bypass na 10ª Rodada]
+    IMC --> OUT([Próximo Estado<br/>128-bit])
+    
+    style IN fill:#ffffff,stroke:#333,color:#000
+    style IARK fill:#ffffff,stroke:#333,color:#000
+    style ISR fill:#ffffff,stroke:#333,color:#000
+    style ISB fill:#ffffff,stroke:#333,color:#000
+    style ARK2 fill:#ffffff,stroke:#333,color:#000
+    style IMC fill:#ffffff,stroke:#333,color:#000
+    style OUT fill:#ffffff,stroke:#333,color:#000
+```
 ## 3. Máquina de Estados (FSM) do `minisoc_aes_top`
 
 A FSM opera no domínio `sys_clk` e é estruturada nos seguintes estados principais:
@@ -80,7 +103,7 @@ stateDiagram-v2
     KEY_EXPAND --> ROUND_LOOP : Subchaves pré-computadas
     
     ROUND_LOOP --> ROUND_LOOP : Iteração da rodada (ciclos 1 a 9)
-    ROUND_LOOP --> WRITE_BACK : Rodada 10 concluída
+    ROUND_LOOP --> WRITE_BACK : Rodada 10 concluída (Bypass MixColumns)
     
     WRITE_BACK --> DONE : Escrita de 4 palavras concluída
     
@@ -95,7 +118,9 @@ stateDiagram-v2
 - **IDLE:** Aguarda o pulso de comando `START` gravado via SPI em `AES_CONTROL[0]`.
 - **READ_BLOCK:** Lê 4 palavras de 32 bits da memória compartilhada (`base + 4*block_idx`).
 - **KEY_EXPAND:** Expande a chave original de 128 bits armazenada nos registradores `KEY0..KEY3`.
-- **ROUND_LOOP:** Executa 10 rodadas iterativas (AddRoundKey, SubBytes, ShiftRows, MixColumns).
+- **ROUND_LOOP:** Executa 10 rodadas iterativas controladas pelo contador `round_idx`. O comportamento do datapath depende do registrador de configuração `MODE` (Cifragem ou Decifração):
+  - **Em Cifragem:** O dado atravessa `SubBytes` $\to$ `ShiftRows` $\to$ `MixColumns` $\to$ `AddRoundKey` (chaves $K_1 \to K_{10}$). Na **10ª rodada**, a FSM ativa o *bypass* do `MixColumns`.
+  - **Em Decriptação:** O dado atravessa `InvShiftRows` $\to$ `InvSubBytes` $\to$ `AddRoundKey` $\to$ `InvMixColumns` (chaves $K_9 \to K_0$). Na **10ª rodada**, a FSM ativa o *bypass* do `InvMixColumns`.
 - **WRITE_BACK:** Escreve as 4 palavras resultantes *in-place* no mesmo endereço da memória.
 - **DONE:** Incrementa `BLOCKS_DONE`. Se `BLOCKS_DONE == NUM_BLOCKS`, eleva `DONE=1` e retorna a `IDLE`.
 
