@@ -10,7 +10,21 @@
 
 Durante a Semana 4, o foco foi a integração do ecossistema criptográfico do MiniSoC AES-128. Desenvolvemos o módulo de Expansão de Chave (`minisoc_aes_key_exp.sv`), o Datapath completo combinacional (`minisoc_aes_dp.sv`), e validamos todo o sistema utilizando os vetores oficiais do NIST (FIPS-197). A simulação integrada passou com **0 erros** para os fluxos de Cifragem e Decriptação.
 
-## 2. Implementação da Expansão de Chave (`minisoc_aes_key_exp`)
+## 2. Entregas e Funções dos Módulos (Semana 4)
+
+A tabela e os tópicos abaixo resumem os componentes de hardware desenvolvidos, integrados e validados nesta etapa:
+
+| Módulo RTL | Arquivo Principal | Função Principal no Sistema |
+| :--- | :--- | :--- |
+| **Key Expansion Round** | `minisoc_aes_key_exp_round.sv` | Aplica as funções `RotWord`, `SubWord` (com S-Boxes) e o XOR com a constante `Rcon` para derivar uma subchave a partir da anterior. |
+| **Key Expansion Top** | `minisoc_aes_key_exp.sv` | Arranjo combinacional em cascata que pré-computa e gera simultaneamente as 11 subchaves ($K_0$ a $K_{10}$) do AES-128. |
+| **AES Datapath** | `minisoc_aes_dp.sv` | Núcleo combinacional unificado que gerencia os fluxos de Cifragem e Decriptação, executando o Ciclo 0 (AddRoundKey inicial) e o *bypass* do `MixColumns` na 10ª rodada. |
+
+*   **`minisoc_aes_key_exp_round.sv`**: Responsável pela lógica matemática de uma única derivação de chave no padrão FIPS-197.
+*   **`minisoc_aes_key_exp.sv`**: Top-level do subsistema de chaves que unifica 10 instâncias em cascata e disponibiliza o array `round_keys_o [0:10]` para a FSM.
+*   **`minisoc_aes_dp.sv`**: Concentrador do datapath, roteando os barramentos de 128 bits através de multiplexadores controlados por `enc_dec_i` (cifragem/decriptação), `bypass_mc_i` (rodada 10) e `load_cycle_i` (ciclo 0).
+
+## 3. Implementação da Expansão de Chave (`minisoc_aes_key_exp`)
 
 O algoritmo AES-128 exige a derivação de 11 subchaves (Round Keys, $K_0$ a $K_{10}$) a partir da chave original de 128 bits fornecida via SPI.
 
@@ -51,7 +65,7 @@ CPU Time:      0.390 seconds;       Data structure size:   0.0Mb
 Wed Nov 11 15:43:26 2026
 ```
 
-## 3. Integração do Datapath Completo (`minisoc_aes_dp`)
+## 4. Integração do Datapath Completo (`minisoc_aes_dp`)
 
 O datapath unifica as transformações diretas e inversas desenvolvidas nas semanas anteriores, incorporando a lógica de controle de rota (*steering logic*) e multiplexadores discutida no documento de microarquitetura.
 
@@ -63,7 +77,7 @@ O datapath unifica as transformações diretas e inversas desenvolvidas nas sema
 
 3. **Bypass da 10ª Rodada:** Um sinal de controle gerenciado pela FSM ativa o *bypass* do módulo `MixColumns` (na cifragem) ou `InvMixColumns` (na decriptação) exatamente na última rodada, conforme estipulado pela norma FIPS-197.
 
-## 4. Resultados de Verificação e Simulação do Datapath
+## 5. Resultados de Verificação e Simulação do Datapath
 
 O testbench de integração (`tb_semana04_dp.sv`) simulou o ciclo de vida completo de um bloco de dados sob o ecossistema do Synopsys VCS.
 
@@ -105,6 +119,6 @@ CPU Time:      0.380 seconds;       Data structure size:   0.0Mb
 Wed Nov 11 16:00:43 2026
 ```
 
-## 5. Conclusão e Próximos Passos
+## 6. Conclusão e Próximos Passos
 
 A conclusão bem-sucedida da Semana 4 sela o núcleo funcional do acelerador criptográfico. Para a **Semana 5**, o foco será o desenvolvimento da Máquina de Estados Finos (FSM) de topo (`minisoc_aes_top.sv`), interligando o motor AES validado aos registradores de controle e barramentos do sistema MiniSoC.
