@@ -36,6 +36,9 @@ O sistema de topo (`minisoc_top`) integra os quatro subsistemas funcionais espec
 │   ├── minisoc_spi/     # Front-end SPI e banco de registradores
 │   └── minisoc_top.sv   # Top-level de integração do sistema
 ├── tb/                  # Testbenches self-checking e vetores da FIPS-197
+├── scripts/             # Run .sh
+├── sim/                 # Simv
+├── models/              # Modelos simples do PLL e da memoria (testes iniciais)
 ├── tools/               # Scripts auxiliares em Python (geradores e modelos de ref)
 ├── syn/                 # Arquivos SDC, scripts TCL e relatórios do Design Compiler
 ├── formal/              # Scripts e relatórios de equivalência formal (Formality)
