@@ -77,7 +77,7 @@ As tarefas e entregáveis estão organizados nas quatro colunas oficiais do quad
 3. **Em Review:** Entregas congeladas em tag oficial (ex.: `rtl-v1.0`) que estão sob análise e simulação de regressão do **verificador parceiro**.
 4. **Feito:** Tarefas e entregáveis com critérios de aceite atendidos e verificados.
 
-> 🤝 **Autonomia do Verificador Parceiro:** Assim que o verificador concluir a suíte de testes de simulação e regressão sobre uma tag de entrega (ex.: `rtl-v1.0`, `rtl-v1.1`), ele mesmo deve mover a respectiva Issue/Card da coluna **Em Review** diretamente para **Feito**, ou voltar para **Em Progresso** relatando o bug.
+> 🤝 **Autonomia do Verificador Parceiro:** Assim que o verificador concluir a suíte de testes de simulação e regressão sobre uma tag de entrega (ex.: `rtl-v1.0`, `rtl-v1.1`), ele mesmo deve mover a respectiva Issue/Card da coluna **Em Review** diretamente para **Feito**, ou voltar para **Em Progresso** relatando o bug (Se colaborador).
 
 ---
 
