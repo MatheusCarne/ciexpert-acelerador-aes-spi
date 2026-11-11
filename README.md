@@ -27,7 +27,7 @@ O sistema de topo (`minisoc_top`) integra os quatro subsistemas funcionais espec
 ├── docs/
 │   ├── spec/            # Block Guide do MiniSoC AES v1.0.0
 │   ├── architecture/    # Microarquitetura v1.0 e Arquitetura de Energia
-│   └── reports/         # Relatórios de entregas semanais (w01 a w13)
+│   └── reports/         # Relatórios de entregas semanais (w01 a w13 e Mestre de Verificação)
 ├── rtl/
 │   ├── minisoc_aes/     # S-Box, SubBytes, ShiftRows, MixColumns, KeyExp, DP e Top
 │   ├── minisoc_mem/     # Memória compartilhada 1024x32
