@@ -1,5 +1,35 @@
-### Log de Sucesso da Simulação (Synopsys VCS) | semana 1:
-```text
+# Documento Mestre de Verificação — MiniSoC AES v1.0
+
+## 1\. Resumo Executivo
+
+Este documento consolida o plano, a metodologia e os resultados da verificação funcional do acelerador criptográfico **MiniSoC AES-128** desenvolvido em SystemVerilog. O IP passou por uma abordagem de verificação *bottom-up* (de módulos isolados até o *datapath* integrado), utilizando o simulador Synopsys VCS e tendo como referência ouro os vetores oficiais do padrão **NIST FIPS-197**.
+
+## 2\. Escopo do IP e Arquitetura Verificada
+
+* **Algoritmo:** AES-128 (Cifragem e Decriptação).  
+* **Topologia:** *Datapath* iterativo de 1 rodada por ciclo com 16 S-Boxes paralelas.  
+* **Expansão de Chave:** Pré-computação combinacional das 11 *round keys* (\$K\_0\$ a \$K\_{10}\$) via *loop unroll* estático.  
+* **Mecanismos de Controle:** Ciclo de carregamento (*AddRoundKey* inicial no Ciclo 0\) e lógica de *bypass* do `(Inv)MixColumns` na 10ª rodada.
+
+
+## 3\. Metodologia de Verificação e Histórico de Testes (Semanas 1 a 4\)
+
+O processo de testes foi dividido em marcos incrementais para isolar falhas de roteamento e lógica combinacional:
+
+| Marco | Módulo Alvo | Descrição do Teste / Vetor de Referência | Status / Evidência |
+| :---- | :---- | :---- | :---- |
+| **Semana 1** | Lógica Básica | Validação de barramentos e operações de XOR de 128 bits. | **\[PASS\]** (0 erros) \[cite: 1\] |
+| **Semana 2** | `SubBytes` & `ShiftRows` | Verificação exata com o Apêndice B do FIPS-197 e 2.000 estados aleatórios. | **\[PASS\]** (6.268 checks, 0 erros) \[cite: 1\] |
+| **Semana 3** | `MixColumns` & Inversos | Prova de inversão algorítmica (`InvMixColumns(MixColumns(X)) == X`) em 2.000 matrizes. | **\[PASS\]** (2.003 checks, 0 erros) \[cite: 1\] |
+| **Semana 4.1** | `Key Expansion` | Comparação das 11 subchaves geradas com o Apêndice A do FIPS-197. | **\[PASS\]** (11 checks, 0 erros) \[cite: 1\] |
+| **Semana 4.2** | Datapath Completo | Simulação ponta a ponta (Cifragem e Recuperação do Plaintext via Decriptação). | **\[PASS\]** (Validado com FIPS-197) \[cite: 1\] |
+
+
+## 4\. Logs Oficiais Consolidados de Simulação
+
+### 4.1. Semana 1 — Log de Sucesso da Simulação (Synopsys VCS)
+
+```
 ==================================================
 [TEST] Entrada  (Data) : 0x0123456789abcdef0123456789abcdef
 [TEST] Chave    (Key)  : 0xfedcba9876543210fedcba9876543210
@@ -14,7 +44,8 @@ Time: 60000 ps
 CPU Time:      0.380 seconds;       Data structure size:   0.0Mb
 Sat Oct 10 16:07:04 2026
 ```
-### Log de simulação SubBytes e ShiftRows | semana 2:
+
+### 4.2. Semana 2 — Log de simulação SubBytes e ShiftRows
 
 ```
 Chronologic VCS simulator copyright 1991-2025
@@ -31,8 +62,10 @@ Time: 2265000 ps
 CPU Time:      0.410 seconds;       Data structure size:   0.0Mb
 == RESULTADO: PASS ==
 ```
-### Log de simulação transformações Mixcolumns e AddRoundKey | semana 3:
-```text
+
+### 4.3. Semana 3 — Log de simulação MixColumns & Inversos
+
+```
 Chronologic VCS simulator copyright 1991-2025
 Compiler version X-2025.06-SP2_Full64; Runtime version X-2025.06-SP2_Full64;  Nov  4 14:18 2026
 [INFO] 2000 verificacoes de inversao concluidas.
@@ -44,8 +77,10 @@ $finish at simulation time              2003000
 Time: 2003000 ps
 CPU Time:      0.440 seconds;       Data structure size:   0.0Mb
 ```
-### Log de Simulação da Expansão de Chave | semana 4:
-```text
+
+### 4.4. Semana 4 — Log de Simulação da Expansão de Chaves
+
+```
 ==> Executando Simulação...
 ./simv
 Info: [VCS_SAVE_RESTORE_INFO] ASLR (Address Space Layout Randomization) is detected on the machine. To enable $save functionality, ASLR will be switched off and simv re-executed.
@@ -74,8 +109,10 @@ Time: 10000 ps
 CPU Time:      0.390 seconds;       Data structure size:   0.0Mb
 Wed Nov 11 15:43:26 2026
 ```
-### Log de Simulação do Datapath Completo | semana 4:
-```text
+
+### 4.5. Semana 4 — Log de Simulação Datapath Completo (Cifragem e Decriptação)
+
+```
 ==> Executando Simulação...
 ./simv
 Info: [VCS_SAVE_RESTORE_INFO] ASLR (Address Space Layout Randomization) is detected on the machine. To enable $save functionality, ASLR will be switched off and simv re-executed.
@@ -101,3 +138,8 @@ Time: 115000 ps
 CPU Time:      0.380 seconds;       Data structure size:   0.0Mb
 Wed Nov 11 16:00:43 2026
 ```
+
+
+## 5\. Conclusão e Próximos Passos
+
+O núcleo computacional do acelerador MiniSoC AES encontra-se **funcionalmente congelado e validado**. O próximo marco (Semana 5\) consiste na implementação da **FSM de Controle (`minisoc_aes_top.sv`)** para automatizar a transição dos estados através de comandos acionados pela interface SPI, substituindo os estímulos manuais dos *testbenches* atuais.
