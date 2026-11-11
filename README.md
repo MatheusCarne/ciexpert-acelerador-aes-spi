@@ -27,7 +27,8 @@ O sistema de topo (`minisoc_top`) integra os quatro subsistemas funcionais espec
 ├── docs/
 │   ├── spec/            # Block Guide do MiniSoC AES v1.0.0
 │   ├── architecture/    # Microarquitetura v1.0 e Arquitetura de Energia
-│   └── reports/         # Relatórios de entregas semanais (w01 a w13 e Mestre de Verificação)
+│   ├── reports/         # Relatórios de entregas semanais (w01 a w13)
+|   └── evidence/        # Documento Mestre de Verificação
 ├── rtl/
 │   ├── minisoc_aes/     # S-Box, SubBytes, ShiftRows, MixColumns, KeyExp, DP e Top
 │   ├── minisoc_mem/     # Memória compartilhada 1024x32
@@ -69,9 +70,9 @@ O ciclo de desenvolvimento de 13 semanas é gerenciado no quadro **CI EXPERT** d
 | :---: | :---: | :--- | :---: | :--- |
 | **#1** | **W01** | Kick-off, Estudo do Algoritmo/SPI e Ambiente Inicial | `Feito` | M1: Architecture Freeze |
 | **#2** | **W02** | Desafio RTL: SubBytes, ShiftRows e S-box + Testbench | `Feito` | M1: Architecture Freeze |
-| **#3** | **W03** | Microarquitetura v1.0, MixColumns, AddRoundKey e Inversas | `Em Progresso` | M1: Architecture Freeze |
-| **#4** | **W04** | Expansão de Chave (Key Expansion) e Datapath AES-128 | `Pendente` | M2: RTL Freeze v1.0 |
-| **#5** | **W05** | SPI Front-End, Banco de Registradores e PLL Mock | `Pendente` | M2: RTL Freeze v1.0 |
+| **#3** | **W03** | Microarquitetura v1.0, MixColumns, AddRoundKey e Inversas | `Feito` | M1: Architecture Freeze |
+| **#4** | **W04** | Expansão de Chave (Key Expansion) e Datapath AES-128 | `Feito` | M2: RTL Freeze v1.0 |
+| **#5** | **W05** | SPI Front-End, Banco de Registradores e PLL Mock | `Em Progresso` | M2: RTL Freeze v1.0 |
 | **#6** | **W06** | AES Engine (FSM ECB/CBC/CTR) e Memória Compartilhada | `Pendente` | M2: RTL Freeze v1.0 |
 | **#7** | **W07** | Integração do Top-Level (`minisoc_top`) e RTL v1.0 | `Pendente` | M2: RTL Freeze v1.0 |
 | **#8** | **W08** | Síntese Lógica Inicial e Baseline de Timing/Área (SDC) | `Pendente` | M3: Baseline Synthesis & Formal |
