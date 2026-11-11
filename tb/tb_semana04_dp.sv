@@ -26,7 +26,7 @@ module tb_semana04_dp;
 
   // Vetores de Referencia FIPS-197
   logic [127:0] plaintext  = 128'h3243f6a8885a308d313198a2e0370734;
-  logic [127:0] ciphertext = 128'h3925841d02dc09fbdce118aa3f971408;
+  logic [127:0] ciphertext = 128'h3925841d02dc09fbdc118597196a0b32;
   
   logic [127:0] st_reg; // O nosso registrador de estado "virtual"
 
