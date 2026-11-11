@@ -1,7 +1,6 @@
 // ============================================================================
-// minisoc_aes_sub_bytes.sv
-// SubBytes: aplica a S-box a cada um dos 16 bytes do estado (128 bits).
-// Convencao do projeto: byte 0 em [127:120] ... byte 15 em [7:0].
+// minisoc_aes_sub_bytes.sv (Golden Model)
+// SubBytes (FIPS-197 5.1.1): Aplica a S-box a cada byte do estado.
 // ============================================================================
 module minisoc_aes_sub_bytes (
   input  logic [127:0] state_i,
