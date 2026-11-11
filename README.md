@@ -106,13 +106,13 @@ Para garantir a estabilidade do ambiente de verificação, as entregas de códig
 | **W04** | 13/11/2026 | Key Expansion e Datapath AES-128 (`minisoc_aes_dp`) | `w04-keyexp-datapath-v1.0` | — | — |
 | **W05** | 20/11/2026 | SPI Slave (Modo 0), registradores e PLL mock | `w05-spi-pll-v1.0` | — | — |
 | **W06** | 27/11/2026 | AES Engine (`minisoc_aes_top`) e Memória 1024x32 | `w06-aes-engine-mem-v1.0` | — | — |
-| **W07** | 04/12/2026 | **Top-level integrado (`minisoc_top`) — RTL v1.0** | `w07-rtl-v1.0` |  **`rtl-v1.0`** | `W07: RTL v1.0 (First Handshake DV)` |
+| **W07** | 04/12/2026 | **Top-level integrado (`minisoc_top`) — RTL v1.0** | `w07-top-integration-v1.0` |  **`rtl-v1.0`** | `W07: RTL v1.0 (First Handshake DV)` |
 | **W08** | 11/12/2026 | Restrições SDC, síntese lógica e relatório baseline | `w08-synthesis-baseline-v1.0` | — | — |
 | **W09** | 18/12/2026 | Fluxo no Formality e verificação de equivalência | `w09-formal-v1.0` | — | — |
 | **—** | **Recesso** | *21/12/2026 a 03/01/2027 — Sem entregas* | — | — | — |
-| **W10** | 08/01/2027 | **Suporte aos 6 modos AES e correções — RTL v1.1** | `w10-rtl-v1.1` |  **`rtl-v1.1`** | `W10: RTL v1.1 (Functional Freeze)` |
+| **W10** | 08/01/2027 | **Suporte aos 6 modos AES e correções — RTL v1.1** | `w10-all-modes-v1.1` |  **`rtl-v1.1`** | `W10: RTL v1.1 (Functional Freeze)` |
 | **W11** | 15/01/2027 | Arquitetura de energia, UPF e simulação power-aware | `w11-upf-power-arch-v1.0` | — | — |
-| **W12** | 22/01/2027 | **Power gating, ICG clock gating — RTL v2.0** | `w12-rtl-v2.0` |  **`rtl-v2.0`** | — |
+| **W12** | 22/01/2027 | **Power gating, ICG clock gating — RTL v2.0** | `w12-low-power-v2.0` |  **`rtl-v2.0`** | — |
 | **W13** | 29/01/2027 | **Síntese Low Power final, relatórios e apresentação** | `w13-final-release-v2.0` | — | `W13: RTL v2.0 (Final Low Power IP Release)` |
 
 </details>
