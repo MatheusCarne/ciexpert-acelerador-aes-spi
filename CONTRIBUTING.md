@@ -123,11 +123,11 @@ Utilize commits semânticos vinculando as alterações à Issue correspondente:
 | **W04** | Expansão de chave e datapath AES-128 | `w04-keyexp-datapath-v1.0` | — | — |
 | **W05** | SPI front-end, registradores e PLL mock | `w05-spi-pll-v1.0` | — | — |
 | **W06** | AES engine (ECB, CBC, CTR) e memória compartilhada | `w06-aes-engine-mem-v1.0` | — | — |
-| **W07** | **Top-level integrado e RTL v1.0** | `w07-rtl-v1.0` |  **`rtl-v1.0`** | `W04-W07: RTL v1.0 (First Handshake DV)` |
+| **W07** | **Top-level integrado e RTL v1.0** | `w07-top-integration-v1.0` |  **`rtl-v1.0`** | `W04-W07: RTL v1.0 (First Handshake DV)` |
 | **W08** | Síntese inicial e baseline SDC | `w08-synthesis-baseline-v1.0` | — | — |
 | **W09** | Verificação formal de equivalência (Formality) | `w09-formal-v1.0` | — | — |
-| **W10** | **Fechamento funcional (6 modos) e RTL v1.1** | `w10-rtl-v1.1` |  **`rtl-v1.1`** | `W08-W10: RTL v1.1 (Functional Freeze)` |
+| **W10** | **Fechamento funcional (6 modos) e RTL v1.1** | `w10-all-modes-v1.1` |  **`rtl-v1.1`** | `W08-W10: RTL v1.1 (Functional Freeze)` |
 | **W11** | Arquitetura de energia e UPF | `w11-upf-power-arch-v1.0` | — | — |
-| **W12** | **Power Gating, Clock Gating e RTL v2.0** | `w12-rtl-v2.0` |  **`rtl-v2.0`** | — |
+| **W12** | **Power Gating, Clock Gating e RTL v2.0** | `w12-low-power-v2.0` |  **`rtl-v2.0`** | — |
 | **W13** | Síntese Low Power e apresentação final | `w13-final-release-v2.0` | — | `W11-W13: RTL v2.0 (Final Low Power IP Release)` |
 
