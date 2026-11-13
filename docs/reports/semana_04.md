@@ -4,7 +4,7 @@
 
 **Data:** 11/11/2026
 
-**Projeto:** MiniSoC AES IP Core
+**Projeto:** MiniSoC AES (RTL track)
 
 ## 1. Resumo Executivo
 
