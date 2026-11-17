@@ -138,7 +138,7 @@ Time: 115000 ps
 CPU Time:      0.380 seconds;       Data structure size:   0.0Mb
 Wed Nov 11 16:00:43 2026
 ```
-### 5. Semana 5 — Log de Simulação 
+### 5. Semana 5 — Log de Simulação FSM de controle
 
 ```
 ==================================================
@@ -164,7 +164,7 @@ CPU Time:      0.370 seconds;       Data structure size:   0.0Mb
 Tue Nov 17 11:23:05 2026
 ```
 
-### 5.2. Semana 5 — Log de Simulação 
+### 5.2. Semana 5 — Log de Simulação SPI & PLL
 
 ```
 ================================================================
@@ -194,6 +194,6 @@ CPU Time:      0.380 seconds;       Data structure size:   0.1Mb
 Tue Nov 17 11:16:27 2026
 ```
 
-## 5\. Conclusão e Próximos Passos
+## 6\. Conclusão e Próximos Passos
 
-O núcleo computacional do acelerador MiniSoC AES encontra-se **funcionalmente congelado e validado**. O próximo marco (Semana 5\) consiste na implementação da **FSM de Controle (`minisoc_aes_top.sv`)** para automatizar a transição dos estados através de comandos acionados pela interface SPI, substituindo os estímulos manuais dos *testbenches* atuais.
+O núcleo computacional do acelerador MiniSoC AES encontra-se **funcionalmente congelado e validado**. O próximo marco (Semana 6\)
