@@ -71,10 +71,8 @@ module minisoc_spi (
         end
     end
 
-    // Garante que o MISO reflita imediatamente o bit mais significativo ou fique em alta impedância/baixo fora do CS
+    // Garante que o MISO reflita o bit mais significativo apenas quando CS estiver ativo
     assign spi_miso = (!spi_cs_n) ? tx_shift_reg[39] : 1'b0;
-
-    assign spi_miso = tx_shift_reg[39];
 
     // ----------------------------------------------------------------8<--------
     // Sincronização CDC por Toggle (de spi_sclk para clk)
