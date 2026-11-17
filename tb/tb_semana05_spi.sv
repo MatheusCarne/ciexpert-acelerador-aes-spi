@@ -162,6 +162,8 @@ module tb_semana05_spi;
     // Sequência de Estímulos Principais
     // -------------------------------------------------------------------------
     initial begin
+        logic [31:0] rval; // <--- Declarada no topo do bloco initial
+
         clkin       = 0;
         rst_n       = 0;
         pll_enable  = 0;
@@ -204,8 +206,6 @@ module tb_semana05_spi;
         spi_write(6'h0A, 32'h00000004); // NUM_BLOCKS
         spi_write(6'h0B, 32'h00000001); // AES_CONTROL (START)
 
-        logic [31:0] rval;
-        
         spi_read(6'h00, rval);
         if (rval === 32'h2B7E1516) $display("[PASS] KEY0 lido corretamente: 0x%08h", rval);
         else                       $display("[FAIL] KEY0 incorreto. Obtido: 0x%08h", rval);
