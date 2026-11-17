@@ -138,7 +138,61 @@ Time: 115000 ps
 CPU Time:      0.380 seconds;       Data structure size:   0.0Mb
 Wed Nov 11 16:00:43 2026
 ```
+### 5. Semana 5 — Log de Simulação 
 
+```
+==================================================
+ INICIANDO TESTE DA FSM: CIFRAGEM (ENCRYPTION)
+==================================================
+[PASS] Cifragem por FSM validada com sucesso!
+       Obtido:   3925841d02dc09fbdc118597196a0b32
+       Esperado: 3925841d02dc09fbdc118597196a0b32
+==================================================
+ INICIANDO TESTE DA FSM: DECRIPTACAO (DECRYPTION)
+==================================================
+[PASS] Decriptacao por FSM validada com sucesso!
+       Obtido:   3243f6a8885a308d313198a2e0370734
+       Esperado: 3243f6a8885a308d313198a2e0370734
+==================================================
+ TESTES DA SEMANA 5 CONCLUÍDOS
+==================================================
+$finish called from file "tb/tb_semana05.sv", line 115.
+$finish at simulation time               395000
+           V C S   S i m u l a t i o n   R e p o r t
+Time: 395000 ps
+CPU Time:      0.370 seconds;       Data structure size:   0.0Mb
+Tue Nov 17 11:23:05 2026
+```
+
+### 5.2. Semana 5 — Log de Simulação 
+
+```
+================================================================
+ INICIANDO TESTBENCH DIRIGIDO - SEMANA 5 (SPI & PLL)
+================================================================
+[PASS] PLL travado com sucesso para PLL_DIV_SEL = 0 (Divisor /1)
+[PASS] PLL travado com sucesso para PLL_DIV_SEL = 1 (Divisor /2)
+[PASS] PLL travado com sucesso para PLL_DIV_SEL = 10 (Divisor /4)
+[PASS] PLL travado com sucesso para PLL_DIV_SEL = 11 (Divisor /8)
+
+[INFO] Executando Escrita e Leitura de Registradores via SPI...
+[PASS] KEY0 lido corretamente: 0x2b7e1516
+[PASS] KEY1 lido corretamente: 0x28aed2a6
+[PASS] NUM_BLOCKS lido corretamente: 0x00000004
+
+[INFO] Testando proteção de Registradores Read-Only (VERSION)...
+[INFO] Versão original lida: 0x312e3030
+[PASS] Registrador Read-Only protegido com sucesso!
+================================================================
+ TESTES DA SEMANA 5 CONCLUÍDOS COM SUCESSO
+================================================================
+$finish called from file "tb/tb_semana05_spi.sv", line 235.
+$finish at simulation time             37050000
+           V C S   S i m u l a t i o n   R e p o r t
+Time: 37050000 ps
+CPU Time:      0.380 seconds;       Data structure size:   0.1Mb
+Tue Nov 17 11:16:27 2026
+```
 
 ## 5\. Conclusão e Próximos Passos
 
