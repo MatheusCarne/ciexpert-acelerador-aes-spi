@@ -25,7 +25,7 @@ module minisoc_spi (
     logic [39:0] rx_shift_reg;
     logic [39:0] tx_shift_reg;
     logic [5:0]  bit_cnt;
-    logic        frame_done_spi;
+    logic        frame_toggle_spi;
 
     // Sinais decodificados do frame de entrada
     logic        rx_rwb;
@@ -39,30 +39,20 @@ module minisoc_spi (
     // SPI Mode 0: Amostragem no MOSI na borda de subida de spi_sclk
     always_ff @(posedge spi_sclk or negedge rst_n) begin
         if (!rst_n) begin
-            rx_shift_reg <= '0;
-            bit_cnt      <= '0;
+            rx_shift_reg     <= '0;
+            bit_cnt          <= '0;
+            frame_toggle_spi <= 1'b0;
         end else if (spi_cs_n) begin
-            rx_shift_reg <= '0;
-            bit_cnt      <= '0;
+            rx_shift_reg     <= '0;
+            bit_cnt          <= '0;
         end else begin
             rx_shift_reg <= {rx_shift_reg[38:0], spi_mosi};
             if (bit_cnt == 6'd39) begin
-                bit_cnt <= '0;
+                bit_cnt          <= '0;
+                frame_toggle_spi <= ~frame_toggle_spi; // Toggled exatamente no último bit do frame
             end else begin
-                bit_cnt <= bit_cnt + 1'b1;
+                bit_cnt          <= bit_cnt + 1'b1;
             end
-        end
-    end
-
-    // ----------------------------------------------------------------8<--------
-    // Sincronização CDC por Toggle (de spi_sclk para clk) - Corrigido para o 40º bit
-    // ----------------------------------------------------------------8<--------
-    logic frame_toggle_spi;
-    always_ff @(posedge spi_sclk or negedge rst_n) begin
-        if (!rst_n) begin
-            frame_toggle_spi <= 1'b0;
-        end else if (!spi_cs_n && (bit_cnt == 6'd39)) begin
-            frame_toggle_spi <= ~frame_toggle_spi; // Toggled exatamente no último bit do frame
         end
     end
 
@@ -71,26 +61,18 @@ module minisoc_spi (
         if (!rst_n) begin
             tx_shift_reg <= '0;
         end else if (spi_cs_n) begin
-            // Carrega o dado atual lido do barramento para o shift register de transmissão
             tx_shift_reg <= {8'h00, reg_rdata_i};
         end else begin
-            // Desloca para a esquerda a cada pulso de clock, enviando o bit mais significativo
             tx_shift_reg <= {tx_shift_reg[38:0], 1'b0};
         end
     end
 
-    // Garante que o MISO reflita o bit mais significativo apenas quando CS estiver ativo
+    // Atribuição de MISO ativada apenas quando CS está ativo
     assign spi_miso = (!spi_cs_n) ? tx_shift_reg[39] : 1'b0;
 
     // ----------------------------------------------------------------8<--------
     // Sincronização CDC por Toggle (de spi_sclk para clk)
     // ----------------------------------------------------------------8<--------
-    logic frame_toggle_spi;
-    always_ff @(posedge spi_sclk or negedge rst_n) begin
-        if (!rst_n) frame_toggle_spi <= 1'b0;
-        else if (frame_done_spi) frame_toggle_spi <= ~frame_toggle_spi;
-    end
-
     logic [2:0] toggle_sync;
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) toggle_sync <= '0;
