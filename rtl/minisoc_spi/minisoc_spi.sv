@@ -58,18 +58,21 @@ module minisoc_spi (
         end
     end
 
-    // Atualização do MISO na borda de descida de spi_sclk (MSB-first)
+    // Atualização e deslocamento do MISO na borda de descida de spi_sclk (MSB-first)
     always_ff @(negedge spi_sclk or negedge rst_n) begin
         if (!rst_n) begin
             tx_shift_reg <= '0;
         end else if (spi_cs_n) begin
-            // Carrega dado de leitura para o estágio de transmissão
-            // Se o endereço for NOP (0x3F), transmite zeros ou status padrão
-            tx_shift_reg <= {8'h00, reg_rdata_i}; 
+            // Carrega o dado atual lido do barramento para o shift register de transmissão
+            tx_shift_reg <= {8'h00, reg_rdata_i};
         end else begin
+            // Desloca para a esquerda a cada pulso de clock, enviando o bit mais significativo
             tx_shift_reg <= {tx_shift_reg[38:0], 1'b0};
         end
     end
+
+    // Garante que o MISO reflita imediatamente o bit mais significativo ou fique em alta impedância/baixo fora do CS
+    assign spi_miso = (!spi_cs_n) ? tx_shift_reg[39] : 1'b0;
 
     assign spi_miso = tx_shift_reg[39];
 
