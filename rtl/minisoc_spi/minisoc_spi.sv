@@ -39,22 +39,30 @@ module minisoc_spi (
     // SPI Mode 0: Amostragem no MOSI na borda de subida de spi_sclk
     always_ff @(posedge spi_sclk or negedge rst_n) begin
         if (!rst_n) begin
-            rx_shift_reg   <= '0;
-            bit_cnt        <= '0;
-            frame_done_spi <= 1'b0;
+            rx_shift_reg <= '0;
+            bit_cnt      <= '0;
         end else if (spi_cs_n) begin
-            rx_shift_reg   <= '0;
-            bit_cnt        <= '0;
-            frame_done_spi <= 1'b0;
+            rx_shift_reg <= '0;
+            bit_cnt      <= '0;
         end else begin
-            rx_shift_reg   <= {rx_shift_reg[38:0], spi_mosi};
+            rx_shift_reg <= {rx_shift_reg[38:0], spi_mosi};
             if (bit_cnt == 6'd39) begin
-                bit_cnt        <= '0;
-                frame_done_spi <= 1'b1; // Pulso indicando frame completo de 40 bits
+                bit_cnt <= '0;
             end else begin
-                bit_cnt        <= bit_cnt + 1'b1;
-                frame_done_spi <= 1'b0;
+                bit_cnt <= bit_cnt + 1'b1;
             end
+        end
+    end
+
+    // ----------------------------------------------------------------8<--------
+    // Sincronização CDC por Toggle (de spi_sclk para clk) - Corrigido para o 40º bit
+    // ----------------------------------------------------------------8<--------
+    logic frame_toggle_spi;
+    always_ff @(posedge spi_sclk or negedge rst_n) begin
+        if (!rst_n) begin
+            frame_toggle_spi <= 1'b0;
+        end else if (!spi_cs_n && (bit_cnt == 6'd39)) begin
+            frame_toggle_spi <= ~frame_toggle_spi; // Toggled exatamente no último bit do frame
         end
     end
 
