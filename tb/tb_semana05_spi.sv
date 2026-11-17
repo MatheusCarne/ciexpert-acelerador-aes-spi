@@ -133,8 +133,8 @@ module tb_semana05_spi;
         
         @(negedge spi_sclk);
         spi_cs_n = 1'b0;
-        for (int i = 39; i >= 0; i--) begin
-            spi_mosi = frame_phase1[i];
+        for (int i = 0; i < 40; i++) begin
+            spi_mosi = frame_phase1[39-i];
             @(negedge spi_sclk);
         end
         spi_cs_n = 1'b1;
@@ -146,9 +146,9 @@ module tb_semana05_spi;
 
         @(negedge spi_sclk);
         spi_cs_n = 1'b0;
-        for (int i = 39; i >= 0; i--) begin
-            spi_mosi = frame_phase2[i];
-            rx_miso_data = {rx_miso_data[38:0], spi_miso};
+        for (int i = 0; i < 40; i++) begin
+            spi_mosi = frame_phase2[39-i];
+            rx_miso_data = {rx_miso_data[38:0], spi_miso}; // <--- CORRIGIDO: spi_miso aqui!
             @(negedge spi_sclk);
         end
         spi_cs_n = 1'b1;
