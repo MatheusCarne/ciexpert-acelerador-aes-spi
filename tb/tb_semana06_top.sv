@@ -41,15 +41,15 @@ module tb_semana06_top;
         spi_cs_n = 1'b0;
         for (i = 39; i >= 0; i--) begin
             spi_mosi = frame[i];
-            #5ns;
+            #25ns;
             spi_sclk = 1'b1;
-            #5ns;
+            #25ns;
             rx_frame[i] = spi_miso;
             spi_sclk = 1'b0;
         end
-        #5ns;
+        #25ns;
         spi_cs_n = 1'b1;
-        #20ns;
+        #50ns;
     endtask
 
     task automatic spi_write(input logic [5:0] addr, input logic [31:0] data);
@@ -63,13 +63,14 @@ module tb_semana06_top;
         tx     = {1'b0, addr, 1'b0, 32'h0};
         nop_tx = {1'b0, 6'h3F, 1'b0, 32'h0};
         spi_send_40(tx, rx);
+        #100ns;
         spi_send_40(nop_tx, rx);
         data = rx[31:0];
     endtask
 
     task automatic mem_write_32(input logic [9:0] addr, input logic [31:0] data);
-        @(posedge pll_locked_o);
-        repeat (2) @(posedge spi_sclk);
+        wait (pll_locked_o == 1'b1);
+        #20ns;
         ext_mem_en    = 1'b1;
         ext_mem_we    = 1'b1;
         ext_mem_addr  = addr;
@@ -81,6 +82,7 @@ module tb_semana06_top;
 
     logic [31:0] rdata;
     logic [31:0] out_w0, out_w1, out_w2, out_w3;
+    int          poll_cnt;
 
     initial begin
         rst_n         = 1'b0;
@@ -91,58 +93,113 @@ module tb_semana06_top;
         ext_mem_we    = 1'b0;
         ext_mem_addr  = 10'd0;
         ext_mem_wdata = 32'd0;
+        poll_cnt      = 0;
 
-        #20ns;
+        if ($test$plusargs("MON")) begin
+            $monitor("[MON @ %0t] st=%0d cmd_start=%b core_start=%b core_busy=%b core_done=%b ctrl_busy=%b done_sticky=%b",
+                     $time, dut.state_q, dut.cmd_start_pulse, dut.core_start_pulse,
+                     dut.core_busy, dut.core_done, dut.ctrl_busy, dut.ctrl_done_sticky);
+        end
+        #50ns;
         rst_n = 1'b1;
 
         // Habilita PLL (MEM_SEL_AES=0, PLL_ENABLE=1, DIV=/8 -> 2'b11 << 2)
+        $display("[STEP 1] Habilitando PLL @ %0t", $time);
         spi_write(6'h0E, 32'h0000_000E);
         wait (pll_locked_o == 1'b1);
-        $display("[PASS] PLL travado na Semana 6.");
+        $display("[PASS] PLL travado na Semana 6 @ %0t", $time);
 
         // Escreve chave NIST FIPS-197
+        $display("[STEP 2] Escrevendo chave AES-128 @ %0t", $time);
         spi_write(6'h00, 32'h2b7e1516);
         spi_write(6'h01, 32'h28aed2a6);
         spi_write(6'h02, 32'habf71588);
         spi_write(6'h03, 32'h09cf4f3c);
 
         // Configura 1 bloco
+        $display("[STEP 3] Configurando NUM_BLOCKS = 1 @ %0t", $time);
         spi_write(6'h0A, 32'h0000_0001);
 
         // Carrega bloco de entrada na memória (endereços 0..3)
+        $display("[STEP 4] Escrevendo bloco de entrada na memoria @ %0t", $time);
         mem_write_32(10'd0, 32'h3243f6a8);
         mem_write_32(10'd1, 32'h885a308d);
         mem_write_32(10'd2, 32'h313198a2);
         mem_write_32(10'd3, 32'he0370734);
 
         // Seleciona memória para AES (MEM_SEL_AES=1) e mantém PLL habilitado
+        $display("[STEP 5] Selecionando memoria para AES (0x0E = 0x0F) @ %0t", $time);
         spi_write(6'h0E, 32'h0000_000F);
 
         // Dispara START (bit 0 de AES_CONTROL em 0x0B)
-        spi_write(6'h0B, 32'h0000_0001);
+        $display("[STEP 6] Disparando START (0x0B = 0x01) @ %0t", $time);
+        spi_write(6'h0B, 32'h0000_0003);
 
-        // Aguarda conclusão via AES_STATUS (0x0C)
+        // Aguarda conclusão via AES_STATUS (0x0C) com diagnóstico e timeout
+        poll_cnt = 0;
         do begin
-            #100ns;
+            #200ns;
+            $display("[DEBUG] Antes de spi_read(0x0C) iteracao %0d @ %0t", poll_cnt + 1, $time);
             spi_read(6'h0C, rdata);
+            poll_cnt++;
+            $display("[POLL %0d] AES_STATUS (0x0C) = 0x%08h @ %0t", poll_cnt, rdata, $time);
+            if (poll_cnt > 100) begin
+                $fatal(1, "[TIMEOUT] AES_STATUS nao setou DONE apos 100 leituras.");
+            end
         end while (rdata[1] == 1'b0);
 
         $display("[INFO] AES_STATUS final: 0x%08h", rdata);
 
         // Devolve memória para acesso externo (MEM_SEL_AES=0) e lê saída em 512..515
         spi_write(6'h0E, 32'h0000_000E);
-        #20ns;
-        ext_mem_en = 1'b1; ext_mem_we = 1'b0; ext_mem_addr = 10'd512; #20ns; out_w0 = ext_mem_rdata;
-        ext_mem_addr = 10'd513; #20ns; out_w1 = ext_mem_rdata;
-        ext_mem_addr = 10'd514; #20ns; out_w2 = ext_mem_rdata;
-        ext_mem_addr = 10'd515; #20ns; out_w3 = ext_mem_rdata;
+        #50ns;
+        ext_mem_en = 1'b1; ext_mem_we = 1'b0; ext_mem_addr = 10'd512; #50ns; out_w0 = ext_mem_rdata;
+        ext_mem_addr = 10'd513; #50ns; out_w1 = ext_mem_rdata;
+        ext_mem_addr = 10'd514; #50ns; out_w2 = ext_mem_rdata;
+        ext_mem_addr = 10'd515; #50ns; out_w3 = ext_mem_rdata;
         ext_mem_en = 1'b0;
 
         $display("[INFO] Saida AES: %08h %08h %08h %08h", out_w0, out_w1, out_w2, out_w3);
         if ({out_w0, out_w1, out_w2, out_w3} == 128'h3925841d_02dc09fb_dc118597_196a0b32)
-            $display("[PASS] Vetor FIPS-197 validado no minisoc_top!");
+            $display("[PASS] Cifragem FIPS-197 validada no minisoc_top!");
         else
-            $display("[FAIL] Resultado divergente do esperado.");
+            $fatal(1, "[FAIL] Cifragem divergente do esperado.");
+
+        // Teste de decriptação (InvCipher: bit 1 = 0, START = 1 -> 32'h0000_0001)
+        $display("[STEP 7] Carregando ciphertext FIPS-197 para decriptacao @ %0t", $time);
+        spi_write(6'h0E, 32'h0000_000E);
+        #20ns;
+        mem_write_32(10'd0, 32'h3925841d);
+        mem_write_32(10'd1, 32'h02dc09fb);
+        mem_write_32(10'd2, 32'hdc118597);
+        mem_write_32(10'd3, 32'h196a0b32);
+
+        spi_write(6'h0E, 32'h0000_000F);
+        spi_write(6'h0B, 32'h0000_0001);
+
+        poll_cnt = 0;
+        do begin
+            #200ns;
+            spi_read(6'h0C, rdata);
+            poll_cnt++;
+            if (poll_cnt > 100) begin
+                $fatal(1, "[TIMEOUT] AES_STATUS nao setou DONE na decriptacao.");
+            end
+        end while (rdata[1] == 1'b0);
+
+        spi_write(6'h0E, 32'h0000_000E);
+        #50ns;
+        ext_mem_en = 1'b1; ext_mem_we = 1'b0; ext_mem_addr = 10'd512; #50ns; out_w0 = ext_mem_rdata;
+        ext_mem_addr = 10'd513; #50ns; out_w1 = ext_mem_rdata;
+        ext_mem_addr = 10'd514; #50ns; out_w2 = ext_mem_rdata;
+        ext_mem_addr = 10'd515; #50ns; out_w3 = ext_mem_rdata;
+        ext_mem_en = 1'b0;
+
+        $display("[INFO] Saida Decriptacao AES: %08h %08h %08h %08h", out_w0, out_w1, out_w2, out_w3);
+        if ({out_w0, out_w1, out_w2, out_w3} == 128'h3243f6a8_885a308d_313198a2_e0370734)
+            $display("[PASS] Decriptacao FIPS-197 validada no minisoc_top!");
+        else
+            $fatal(1, "[FAIL] Decriptacao divergente do plaintext esperado.");
 
         $finish;
     end
