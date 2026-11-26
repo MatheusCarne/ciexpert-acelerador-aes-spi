@@ -75,7 +75,7 @@ module tb_semana06_top;
         ext_mem_we    = 1'b1;
         ext_mem_addr  = addr;
         ext_mem_wdata = data;
-        #20ns;
+        #50ns;
         ext_mem_en    = 1'b0;
         ext_mem_we    = 1'b0;
     endtask
@@ -100,51 +100,51 @@ module tb_semana06_top;
                      $time, dut.state_q, dut.cmd_start_pulse, dut.core_start_pulse,
                      dut.core_busy, dut.core_done, dut.ctrl_busy, dut.ctrl_done_sticky);
         end
+
         #50ns;
         rst_n = 1'b1;
 
-        // Habilita PLL (MEM_SEL_AES=0, PLL_ENABLE=1, DIV=/8 -> 2'b11 << 2)
+        // [STEP 1] Habilita PLL (MEM_SEL_AES=0, PLL_ENABLE=1, DIV=/8 -> 2'b11 << 2)
         $display("[STEP 1] Habilitando PLL @ %0t", $time);
         spi_write(6'h0E, 32'h0000_000E);
         wait (pll_locked_o == 1'b1);
         $display("[PASS] PLL travado na Semana 6 @ %0t", $time);
 
-        // Escreve chave NIST FIPS-197
+        // [STEP 2] Escreve chave AES-128 FIPS-197 (2b7e1516 28aed2a6 abf71588 09cf4f3c / 00010203..0c0d0e0f)
         $display("[STEP 2] Escrevendo chave AES-128 @ %0t", $time);
         spi_write(6'h00, 32'h2b7e1516);
         spi_write(6'h01, 32'h28aed2a6);
         spi_write(6'h02, 32'habf71588);
         spi_write(6'h03, 32'h09cf4f3c);
 
-        // Configura 1 bloco
+        // [STEP 3] Configura NUM_BLOCKS = 1 (registrador 0x0A)
         $display("[STEP 3] Configurando NUM_BLOCKS = 1 @ %0t", $time);
         spi_write(6'h0A, 32'h0000_0001);
 
-        // Carrega bloco de entrada na memória (endereços 0..3)
+        // [STEP 4] Garante MEM_SEL_AES=0 e escreve plaintext FIPS-197 em 0..3
         $display("[STEP 4] Escrevendo bloco de entrada na memoria @ %0t", $time);
+        spi_write(6'h0E, 32'h0000_000E);
+        #20ns;
         mem_write_32(10'd0, 32'h3243f6a8);
         mem_write_32(10'd1, 32'h885a308d);
         mem_write_32(10'd2, 32'h313198a2);
         mem_write_32(10'd3, 32'he0370734);
 
-        // Seleciona memória para AES (MEM_SEL_AES=1) e mantém PLL habilitado
+        // [STEP 5] Seleciona memória para AES (0x0E = 0x0F)
         $display("[STEP 5] Selecionando memoria para AES (0x0E = 0x0F) @ %0t", $time);
         spi_write(6'h0E, 32'h0000_000F);
 
-        // Dispara START (bit 0 de AES_CONTROL em 0x0B)
-        $display("[STEP 6] Disparando START (0x0B = 0x01) @ %0t", $time);
+        // [STEP 6] Dispara START (bit 0 = 1) e enc_dec_i = 1 (bit 1 = 1 -> Cipher) => 32'h0000_0003
+        $display("[STEP 6] Disparando START cifragem (0x0B = 0x03) @ %0t", $time);
         spi_write(6'h0B, 32'h0000_0003);
 
-        // Aguarda conclusão via AES_STATUS (0x0C) com diagnóstico e timeout
         poll_cnt = 0;
         do begin
             #200ns;
-            $display("[DEBUG] Antes de spi_read(0x0C) iteracao %0d @ %0t", poll_cnt + 1, $time);
             spi_read(6'h0C, rdata);
             poll_cnt++;
-            $display("[POLL %0d] AES_STATUS (0x0C) = 0x%08h @ %0t", poll_cnt, rdata, $time);
             if (poll_cnt > 100) begin
-                $fatal(1, "[TIMEOUT] AES_STATUS nao setou DONE apos 100 leituras.");
+                $fatal(1, "[TIMEOUT] AES_STATUS nao setou DONE na cifragem.");
             end
         end while (rdata[1] == 1'b0);
 
