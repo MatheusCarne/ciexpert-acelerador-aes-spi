@@ -14,34 +14,29 @@ module minisoc_aes_top (
   output logic         done_o        // Pulso de 1 ciclo indicando conclusão
 );
 
-  // Estados da FSM
   typedef enum logic [2:0] {
-    IDLE        = 3'b000,
-    LOAD_CYCLE  = 3'b001, // Ciclo 0: AddRoundKey inicial
-    ROUND_LOOP  = 3'b010, // Rodadas 1 a 9
-    FINAL_ROUND = 3'b011, // Rodada 10 (com bypass de MixColumns)
-    DONE        = 3'b100  // Estado de conclusão
+    IDLE        = 3'd0,
+    CAPTURE_IN  = 3'd1, // Captura data_i em block_reg_q
+    INIT_ROUND  = 3'd2, // Ciclo 0: AddRoundKey inicial
+    ROUND_LOOP  = 3'd3, // Rodadas 1 a 9
+    FINAL_ROUND = 3'd4, // Rodada 10 (bypass de MixColumns)
+    DONE        = 3'd5  // Estado de conclusão (data_o estável + pulso done_o)
   } state_t;
 
   state_t state_q, state_d;
 
-  // Registrador de Estado do Bloco
   logic [127:0] block_reg_q, block_reg_d;
-  
-  // Contador de Rodadas (0 a 10)
   logic [3:0]   round_cnt_q, round_cnt_d;
 
-  // Sinais de Conexão com Submódulos
   logic [127:0] round_keys [0:10];
   logic [127:0] dp_out;
   logic [127:0] current_rkey;
 
-  // Sinais de Controle do Datapath
   logic         load_cycle;
   logic         bypass_mc;
 
   // --------------------------------------------------------------------------
-  // 1. Instanciação da Expansão de Chaves
+  // 1. Expansão de Chaves
   // --------------------------------------------------------------------------
   minisoc_aes_key_exp u_key_exp (
     .key_i        (key_i),
@@ -49,7 +44,7 @@ module minisoc_aes_top (
   );
 
   // --------------------------------------------------------------------------
-  // 2. Instanciação do Datapath Combinacional
+  // 2. Datapath Combinacional
   // --------------------------------------------------------------------------
   minisoc_aes_dp u_dp (
     .state_i      (block_reg_q),
@@ -61,19 +56,14 @@ module minisoc_aes_top (
   );
 
   // --------------------------------------------------------------------------
-  // 3. Seleção de Subchave por Rodada (Corrigida)
+  // 3. Seleção de Subchave por Rodada
   // --------------------------------------------------------------------------
   always_comb begin
+    current_rkey = 128'h0;
     if (load_cycle) begin
-      // Ciclo 0 (AddRoundKey inicial): Cifragem usa K0, Decriptação usa K10
       current_rkey = enc_dec_i ? round_keys[0] : round_keys[10];
-    end else begin
-      // Rodadas 1 a 10
-      if (enc_dec_i) begin
-        current_rkey = round_keys[round_cnt_q];
-      end else begin
-        current_rkey = round_keys[10 - round_cnt_q];
-      end
+    end else if (state_q == ROUND_LOOP || state_q == FINAL_ROUND) begin
+      current_rkey = enc_dec_i ? round_keys[round_cnt_q] : round_keys[10 - round_cnt_q];
     end
   end
 
@@ -83,8 +73,8 @@ module minisoc_aes_top (
   always_ff @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
       state_q     <= IDLE;
-      block_reg_q <= '0;
-      round_cnt_q <= '0;
+      block_reg_q <= 128'h0;
+      round_cnt_q <= 4'd0;
     end else begin
       state_q     <= state_d;
       block_reg_q <= block_reg_d;
@@ -96,13 +86,13 @@ module minisoc_aes_top (
   // 5. Lógica Combinacional da FSM
   // --------------------------------------------------------------------------
   always_comb begin
-    state_d      = state_q;
-    block_reg_d  = block_reg_q;
-    round_cnt_d  = round_cnt_q;
-    busy_o       = 1'b1;
-    done_o       = 1'b0;
-    load_cycle   = 1'b0;
-    bypass_mc    = 1'b0;
+    state_d     = state_q;
+    block_reg_d = block_reg_q;
+    round_cnt_d = round_cnt_q;
+    busy_o      = 1'b1;
+    done_o      = 1'b0;
+    load_cycle  = 1'b0;
+    bypass_mc   = 1'b0;
 
     unique case (state_q)
       IDLE: begin
@@ -110,14 +100,20 @@ module minisoc_aes_top (
         if (start_i) begin
           block_reg_d = data_i;
           round_cnt_d = 4'd0;
-          state_d     = LOAD_CYCLE;
+          state_d     = CAPTURE_IN;
         end
       end
 
-      LOAD_CYCLE: begin
-        load_cycle  = 1'b1;       // Ativa AddRoundKey inicial (Ciclo 0)
-        block_reg_d = dp_out;     
-        round_cnt_d = 4'd1;       // Prepara para a rodada 1
+      CAPTURE_IN: begin
+        // block_reg_q já recebeu data_i na borda anterior; inicia AddRoundKey (rodada 0)
+        round_cnt_d = 4'd0;
+        state_d     = INIT_ROUND;
+      end
+
+      INIT_ROUND: begin
+        load_cycle  = 1'b1;
+        block_reg_d = dp_out;
+        round_cnt_d = 4'd1;
         state_d     = ROUND_LOOP;
       end
 
@@ -127,7 +123,7 @@ module minisoc_aes_top (
         block_reg_d = dp_out;
 
         if (round_cnt_q == 4'd9) begin
-          round_cnt_d = 4'd10;      // Avança para a rodada 10
+          round_cnt_d = 4'd10;
           state_d     = FINAL_ROUND;
         end else begin
           round_cnt_d = round_cnt_q + 4'd1;
@@ -136,9 +132,8 @@ module minisoc_aes_top (
 
       FINAL_ROUND: begin
         load_cycle  = 1'b0;
-        bypass_mc   = 1'b1;       // Ativa o bypass na 10ª rodada
+        bypass_mc   = 1'b1;
         block_reg_d = dp_out;
-        round_cnt_d = 4'd10;
         state_d     = DONE;
       end
 
@@ -148,7 +143,10 @@ module minisoc_aes_top (
         state_d = IDLE;
       end
 
-      default: state_d = IDLE;
+      default: begin
+        busy_o  = 1'b0;
+        state_d = IDLE;
+      end
     endcase
   end
 
