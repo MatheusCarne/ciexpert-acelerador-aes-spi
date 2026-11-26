@@ -8,3 +8,8 @@ simv.daidir/
 vc_hdrs.h
 verdiLog/
 novas*
+
+simv*
+*.daidir/
+ucli.key
+*.vcd
