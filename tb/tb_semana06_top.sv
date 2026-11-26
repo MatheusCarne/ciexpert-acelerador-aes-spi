@@ -122,10 +122,17 @@ module tb_semana06_top;
         spi_write(6'h0B, 32'h0000_0001);
 
         // Aguarda conclusão via AES_STATUS (0x0C)
+        int poll_cnt;
+    ...
+        poll_cnt = 0;
         do begin
             #200ns;
             spi_read(6'h0C, rdata);
-            $display("[POLL] AES_STATUS = 0x%08h @ %0t", rdata, $time);
+            poll_cnt++;
+            $display("[POLL %0d] AES_STATUS (0x0C) = 0x%08h @ %0t", poll_cnt, rdata, $time);
+            if (poll_cnt > 100) begin
+                $fatal(1, "[TIMEOUT] AES_STATUS nao setou DONE apos 100 leituras.");
+            end
         end while (rdata[1] == 1'b0);
 
         $display("[INFO] AES_STATUS final: 0x%08h", rdata);
