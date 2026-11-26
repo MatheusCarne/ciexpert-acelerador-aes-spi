@@ -6,8 +6,6 @@
 - **Simulador:** Synopsys VCS (`X-2025.06-SP2_Full64`, timescale `1ns/1ps`)
 - **Branch / Tag de Entrega:** `semana06-minisoc-top` -> `main` | Tag `w06-aes-engine-mem-v1.0`
 
----
-
 ## 1. Resumo Executivo
 
 Na **Semana 6**, o foco foi integrar completamente o núcleo criptográfico **AES-128** (`minisoc_aes_top` e submódulos) e a memória compartilhada (`minisoc_memory`) ao topo do sistema (`minisoc_top`), operando em conjunto com o `minisoc_pll_mock` (com `sys_clk` de `250 MHz` após lock/divisão) e a interface `minisoc_spi`.
@@ -17,8 +15,6 @@ Durante a integração e simulação no Synopsys VCS, o controlador de blocos e 
 Após a correção da captura/deslocamento de `tx_shift_reg` no `minisoc_spi.sv`, do alinhamento do bit de controle de operação (`enc_dec_i` em `0x0B`) e da resolução de conflitos de *merge* com `origin/main`, a simulação em `tb/tb_semana06_top.sv` validou com sucesso:
 - **Cifragem FIPS-197:** Saída `3925841d 02dc09fb dc118597 196a0b32` com `AES_STATUS = 0x00000202` (`[PASS]`).
 - **Decriptação FIPS-197 (`InvCipher`):** Retorno ao bloco original `3243f6a8 885a308d 313198a2 e0370734` (`[PASS]`).
-
----
 
 ## 2. Tudo o que Foi Realizado na Semana 6
 
@@ -50,7 +46,45 @@ Após a correção da captura/deslocamento de `tx_shift_reg` no `minisoc_spi.sv`
   - `[STEP 7]` Teste de decriptação (`InvCipher` com bit `1 = 0` e `START = 1`, escrevendo `32'h0000_0001` em `0x0B`) carregando o *ciphertext* FIPS-197 em `0..3`, aguardando `DONE` em `0x0C`, lendo `512..515` e verificando `3243f6a8 885a308d 313198a2 e0370734` (`[PASS]`).
 - **Controle de verbosidade:** O `$monitor` detalhado da FSM interna foi condicionado à *plusarg* `+MON` (`$test$plusargs("MON")`), mantendo a saída padrão limpa e objetiva.
 
----
+### Log da Primeira validação da cifragem FIPS-197:
+```text
+[MON @ 16761000] st=3 cmd_start=0 core_start=1 core_busy=0 core_done=0 ctrl_busy=1 done_sticky=0
+[MON @ 16765000] st=4 cmd_start=0 core_start=0 core_busy=1 core_done=0 ctrl_busy=1 done_sticky=0
+[MON @ 16809000] st=4 cmd_start=0 core_start=0 core_busy=0 core_done=1 ctrl_busy=1 done_sticky=0
+[MON @ 16837000] st=0 cmd_start=0 core_start=0 core_busy=0 core_done=0 ctrl_busy=0 done_sticky=1
+[DEBUG] Antes de spi_read(0x0C) iteracao 1 @ 17010000
+[POLL 1] AES_STATUS (0x0C) = 0x00000202 @ 21260000
+[INFO] AES_STATUS final: 0x00000202
+[INFO] Saida AES: 3925841d 02dc09fb dc118597 196a0b32
+[PASS] Vetor FIPS-197 validado no minisoc_top!
+$finish called from file "tb/tb_semana06_top.sv", line 166.
+$finish at simulation time             23585000
+           V C S   S i m u l a t i o n   R e p o r t
+Time: 23585000 ps
+```
+
+### Log da Execução final aprovada (Cifragem + Decriptação FIPS-197):
+```text
+[STEP 1] Habilitando PLL @ 50000
+[PASS] PLL travado na Semana 6 @ 2125000
+[STEP 2] Escrevendo chave AES-128 @ 2125000
+[STEP 3] Configurando NUM_BLOCKS = 1 @ 10425000
+[STEP 4] Escrevendo bloco de entrada na memoria @ 12500000
+[STEP 5] Selecionando memoria para AES (0x0E = 0x0F) @ 14875000
+[STEP 6] Disparando START cifragem (0x0B = 0x03) @ 16950000
+[INFO] AES_STATUS final: 0x00000202
+[INFO] Saida AES: 3925841d 02dc09fb dc118597 196a0b32
+[PASS] Cifragem FIPS-197 validada no minisoc_top!
+[STEP 7] Carregando ciphertext FIPS-197 para decriptacao @ 25800000
+[INFO] Saida Decriptacao AES: 3243f6a8 885a308d 313198a2 e0370734
+[PASS] Decriptacao FIPS-197 validada no minisoc_top!
+$finish called from file "tb/tb_semana06_top.sv", line 204.
+$finish at simulation time             39100000
+           V C S   S i m u l a t i o n   R e p o r t
+Time: 39100000 ps
+CPU Time:      0.410 seconds;       Data structure size:   0.1Mb
+Thu Nov 26 17:00:27 2026
+```
 
 ## 3. Modificações em Arquivos de Outras Semanas / Módulos Existentes
 
@@ -61,8 +95,6 @@ Para viabilizar a integração e a leitura confiável via SPI no `minisoc_top`, 
 | `rtl/minisoc_spi/minisoc_spi.sv` | Refatoração da captura de `reg_rdata_i` no domínio `clk` (`tx_latch_q` quando `reg_rd_en_o` está ativo) e carregamento/deslocamento MSB-first de `tx_shift_reg` alinhado a `posedge spi_cs_n` / `negedge spi_sclk`, com driver único em `tx_shift_reg`. | Corrigir leituras SPI que retornavam `0x00000000` (falta de borda de `negedge spi_sclk` com `spi_cs_n == 1`), evitar erro `Error-[ICPD]` de múltiplos drivers em `always_ff` e eliminar deslocamento de bits (`0x02` aparecendo como `0x40`). |
 | `rtl/minisoc_top/minisoc_top.sv` | Esclarecimento e padronização da ligação de `aes_decrypt` / `aes_enc_dec_sel` (`BIT_AES_CTRL_DECRYPT`) para `.enc_dec_i` do `minisoc_aes_top`, preservando `1` = cifragem (`Cipher`) e `0` = decriptação (`InvCipher`) durante a resolução de conflito com `origin/main`. | Evitar inversão indesejada da operação (`~aes_decrypt` da `origin/main` inverteria a polaridade já validada no `minisoc_aes_top`). |
 | `.gitignore` | Inclusão de regras para artefatos de compilação e simulação do Synopsys VCS (`simv*`, `*.daidir/`, `csrc/`, `*.key`, `ucli.key`, `vc_hdrs.h`, `*.vcd`, `*.fsdb`, `*.log`). | Impedir o versionamento de binários gerados e diretórios temporários do VCS no repositório GitHub. |
-
----
 
 ## 4. Mudanças Relevantes na Arquitetura
 
@@ -75,7 +107,6 @@ Para viabilizar a integração e a leitura confiável via SPI no `minisoc_top`, 
 3. **Concatenação de Palavras de 32 Bits em Barramentos de 128 Bits:**
    - Validou-se a ordenação `{in_words[0], in_words[1], in_words[2], in_words[3]}` para `core_data_in`, `{key_q[0], key_q[1], key_q[2], key_q[3]}` para `aes_key_128` e `{out_words[0], out_words[1], out_words[2], out_words[3]} = core_data_out` para a escrita na região de saída da memória (`512..515`), reproduzindo exatamente os vetores do padrão FIPS-197.
 
----
 
 ## 5. Dificuldades Encontradas e Soluções Aplicadas
 
@@ -91,12 +122,11 @@ Para viabilizar a integração e a leitura confiável via SPI no `minisoc_top`, 
 4. **Saída divergente na primeira cifragem (`cb13389c 1d59c1d5 0d11f6b9 0c38ce7f`):**
    - **Causa:** Escrita de `32'h0000_0001` no registrador `0x0B` manteve o bit `1` (`enc_dec_i`) em `0`, executando `InvCipher` em vez de `Cipher`.
    - **Solução:** Uso de `32'h0000_0003` no `0x0B` para cifragem e adição de caso de teste dedicado para decriptação (`32'h0000_0001` no `0x0B`).
-5. **Conflitos de *merge* com `origin/main` e truncamento acidental durante resolução automática:**
-   - **Causa:** Divergências entre `semana06-minisoc-top` e `origin/main` em `rtl/minisoc_top/minisoc_top.sv` (polaridade de `enc_dec_i`) e `tb/tb_semana06_top.sv` (`+MON` e loop de *polling*), agravadas por uma expressão regular abrangente que removeu os passos `[STEP 1]` a `[STEP 6]` e causou leitura `x` no `AES_STATUS`.
-   - **Solução:** Preservação da polaridade correta (`enc_dec_i = aes_ctrl_q[BIT_AES_CTRL_DECRYPT]`), restauração completa do fluxo de teste no `tb/tb_semana06_top.sv`, reexecução da simulação VCS com dupla validação FIPS-197 (`[PASS]` na cifragem e na decriptação), atualização do PR e alinhamento da tag `w06-aes-engine-mem-v1.0` na `main`.
+5. **truncamento acidental durante resolução automática:**
+   - **Causa:** (polaridade de `enc_dec_i`) e `tb/tb_semana06_top.sv` (`+MON` e loop de *polling*), agravadas por uma expressão regular abrangente que removeu os passos `[STEP 1]` a `[STEP 6]` e causou leitura `x` no `AES_STATUS`.
+   - **Solução:** Preservação da polaridade correta (`enc_dec_i = aes_ctrl_q[BIT_AES_CTRL_DECRYPT]`), restauração completa do fluxo de teste no `tb/tb_semana06_top.sv`, reexecução da simulação VCS com dupla validação FIPS-197 (`[PASS]` na cifragem e na decriptação).
 
----
 
 ## 6. Conclusão
 
-A integração do núcleo **AES-128** com o `minisoc_top`, `minisoc_memory` e `minisoc_spi` foi concluída e verificada em simulação no Synopsys VCS. O sistema apresentou comunicação SPI confiável para configuração, disparo, *polling* de status e transferência de blocos de memória, validando tanto a cifragem quanto a decriptação do vetor FIPS-197 e deixando o repositório sincronizado na `main` com a tag `w06-aes-engine-mem-v1.0`.
+A integração do núcleo **AES-128** com o `minisoc_top`, `minisoc_memory` e `minisoc_spi` foi concluída e verificada em simulação no Synopsys VCS. O sistema apresentou comunicação SPI confiável para configuração, disparo, *polling* de status e transferência de blocos de memória, validando tanto a cifragem quanto a decriptação do vetor FIPS-197.
