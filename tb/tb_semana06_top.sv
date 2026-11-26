@@ -123,8 +123,9 @@ module tb_semana06_top;
 
         // Aguarda conclusão via AES_STATUS (0x0C)
         do begin
-            #100ns;
+            #200ns;
             spi_read(6'h0C, rdata);
+            $display("[POLL] AES_STATUS = 0x%08h @ %0t", rdata, $time);
         end while (rdata[1] == 1'b0);
 
         $display("[INFO] AES_STATUS final: 0x%08h", rdata);
