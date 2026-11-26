@@ -82,6 +82,7 @@ module minisoc_top #(
 
     logic        cmd_start_pulse;
     logic        aes_decrypt;
+    logic        aes_enc_dec_cmd;
     logic [1:0]  aes_mode;
     logic        mem_sel_aes;
     logic        pll_enable;
@@ -128,19 +129,20 @@ module minisoc_top #(
 
     blk_state_t state_q, next_state;
 
-    assign pll_locked_o = pll_locked;
-    assign aes_key_128    = {key_q[0], key_q[1], key_q[2], key_q[3]};
-    assign aes_iv_128     = {iv_q[0], iv_q[1], iv_q[2], iv_q[3]};
-    assign aes_counter_64 = {counter_hi_q, counter_lo_q};
+    assign pll_locked_o    = pll_locked;
+    assign aes_key_128       = {key_q[0], key_q[1], key_q[2], key_q[3]};
+    assign aes_iv_128        = {iv_q[0], iv_q[1], iv_q[2], iv_q[3]};
+    assign aes_counter_64    = {counter_hi_q, counter_lo_q};
 
-    assign aes_decrypt    = aes_ctrl_q[BIT_AES_CTRL_DECRYPT];
-    assign aes_mode       = aes_ctrl_q[BIT_AES_CTRL_MODE+1:BIT_AES_CTRL_MODE];
+    assign aes_decrypt       = aes_ctrl_q[BIT_AES_CTRL_DECRYPT];
+    assign aes_enc_dec_cmd   = ~aes_decrypt; // 1 = Cifragem, 0 = Decriptação no minisoc_aes_top
+    assign aes_mode          = aes_ctrl_q[BIT_AES_CTRL_MODE+1:BIT_AES_CTRL_MODE];
 
-    assign mem_sel_aes    = sys_ctrl_q[BIT_SYS_CTRL_MEM_SEL];
-    assign pll_enable     = sys_ctrl_q[BIT_SYS_CTRL_PLL_EN];
-    assign pll_div_sel    = sys_ctrl_q[BIT_SYS_CTRL_PLL_EN+2:BIT_SYS_CTRL_PLL_EN+1];
+    assign mem_sel_aes       = sys_ctrl_q[BIT_SYS_CTRL_MEM_SEL];
+    assign pll_enable        = sys_ctrl_q[BIT_SYS_CTRL_PLL_EN];
+    assign pll_div_sel       = sys_ctrl_q[BIT_SYS_CTRL_PLL_EN+2:BIT_SYS_CTRL_PLL_EN+1];
 
-    assign core_data_in   = {in_words[0], in_words[1], in_words[2], in_words[3]};
+    assign core_data_in      = {in_words[0], in_words[1], in_words[2], in_words[3]};
     assign {out_words[0], out_words[1], out_words[2], out_words[3]} = core_data_out;
 
     // ------------------------------------------------------------------------
@@ -394,10 +396,10 @@ module minisoc_top #(
     // 6. Núcleo Criptográfico AES-128
     // ------------------------------------------------------------------------
     minisoc_aes_top u_aes_top (
-        .clk_i     (sys_clk),
-        .rst_n_i   (rst_n),
+        .clk       (sys_clk),
+        .rst_n     (rst_n),
         .start_i   (core_start_pulse),
-        .enc_dec_i (aes_decrypt),
+        .enc_dec_i (aes_enc_dec_cmd),
         .key_i     (aes_key_128),
         .data_i    (core_data_in),
         .data_o    (core_data_out),
