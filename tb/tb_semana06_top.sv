@@ -153,10 +153,10 @@ module tb_semana06_top;
         // Devolve memória para acesso externo (MEM_SEL_AES=0) e lê saída em 512..515
         spi_write(6'h0E, 32'h0000_000E);
         #50ns;
-        ext_mem_en = 1'b1; ext_mem_we = 1'b0; ext_mem_addr = 10'd512; #50ns; out_w0 = ext_mem_rdata;
-        ext_mem_addr = 10'd513; #50ns; out_w1 = ext_mem_rdata;
-        ext_mem_addr = 10'd514; #50ns; out_w2 = ext_mem_rdata;
-        ext_mem_addr = 10'd515; #50ns; out_w3 = ext_mem_rdata;
+        ext_mem_en = 1'b1; ext_mem_we = 1'b0; ext_mem_addr = 10'd0; #50ns; out_w0 = ext_mem_rdata;
+        ext_mem_addr = 10'd1; #50ns; out_w1 = ext_mem_rdata;
+        ext_mem_addr = 10'd2; #50ns; out_w2 = ext_mem_rdata;
+        ext_mem_addr = 10'd3; #50ns; out_w3 = ext_mem_rdata;
         ext_mem_en = 1'b0;
 
         $display("[INFO] Saida AES: %08h %08h %08h %08h", out_w0, out_w1, out_w2, out_w3);
@@ -189,10 +189,10 @@ module tb_semana06_top;
 
         spi_write(6'h0E, 32'h0000_000E);
         #50ns;
-        ext_mem_en = 1'b1; ext_mem_we = 1'b0; ext_mem_addr = 10'd512; #50ns; out_w0 = ext_mem_rdata;
-        ext_mem_addr = 10'd513; #50ns; out_w1 = ext_mem_rdata;
-        ext_mem_addr = 10'd514; #50ns; out_w2 = ext_mem_rdata;
-        ext_mem_addr = 10'd515; #50ns; out_w3 = ext_mem_rdata;
+        ext_mem_en = 1'b1; ext_mem_we = 1'b0; ext_mem_addr = 10'd0; #50ns; out_w0 = ext_mem_rdata;
+        ext_mem_addr = 10'd1; #50ns; out_w1 = ext_mem_rdata;
+        ext_mem_addr = 10'd2; #50ns; out_w2 = ext_mem_rdata;
+        ext_mem_addr = 10'd3; #50ns; out_w3 = ext_mem_rdata;
         ext_mem_en = 1'b0;
 
         $display("[INFO] Saida Decriptacao AES: %08h %08h %08h %08h", out_w0, out_w1, out_w2, out_w3);
