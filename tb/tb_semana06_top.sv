@@ -41,15 +41,15 @@ module tb_semana06_top;
         spi_cs_n = 1'b0;
         for (i = 39; i >= 0; i--) begin
             spi_mosi = frame[i];
-            #5ns;
+            #25ns;
             spi_sclk = 1'b1;
-            #5ns;
+            #25ns;
             rx_frame[i] = spi_miso;
             spi_sclk = 1'b0;
         end
-        #5ns;
+        #25ns;
         spi_cs_n = 1'b1;
-        #20ns;
+        #50ns;
     endtask
 
     task automatic spi_write(input logic [5:0] addr, input logic [31:0] data);
@@ -74,13 +74,14 @@ module tb_semana06_top;
         ext_mem_we    = 1'b1;
         ext_mem_addr  = addr;
         ext_mem_wdata = data;
-        #20ns;
+        #50ns;
         ext_mem_en    = 1'b0;
         ext_mem_we    = 1'b0;
     endtask
 
     logic [31:0] rdata;
     logic [31:0] out_w0, out_w1, out_w2, out_w3;
+    int          poll_cnt;
 
     initial begin
         rst_n         = 1'b0;
@@ -91,8 +92,9 @@ module tb_semana06_top;
         ext_mem_we    = 1'b0;
         ext_mem_addr  = 10'd0;
         ext_mem_wdata = 32'd0;
+        poll_cnt      = 0;
 
-        #20ns;
+        #50ns;
         rst_n = 1'b1;
 
         // Habilita PLL (MEM_SEL_AES=0, PLL_ENABLE=1, DIV=/8 -> 2'b11 << 2)
@@ -122,9 +124,6 @@ module tb_semana06_top;
         spi_write(6'h0B, 32'h0000_0001);
 
         // Aguarda conclusão via AES_STATUS (0x0C)
-        int poll_cnt;
-    ...
-        poll_cnt = 0;
         do begin
             #200ns;
             spi_read(6'h0C, rdata);
@@ -139,11 +138,11 @@ module tb_semana06_top;
 
         // Devolve memória para acesso externo (MEM_SEL_AES=0) e lê saída em 512..515
         spi_write(6'h0E, 32'h0000_000E);
-        #20ns;
-        ext_mem_en = 1'b1; ext_mem_we = 1'b0; ext_mem_addr = 10'd512; #20ns; out_w0 = ext_mem_rdata;
-        ext_mem_addr = 10'd513; #20ns; out_w1 = ext_mem_rdata;
-        ext_mem_addr = 10'd514; #20ns; out_w2 = ext_mem_rdata;
-        ext_mem_addr = 10'd515; #20ns; out_w3 = ext_mem_rdata;
+        #50ns;
+        ext_mem_en = 1'b1; ext_mem_we = 1'b0; ext_mem_addr = 10'd512; #50ns; out_w0 = ext_mem_rdata;
+        ext_mem_addr = 10'd513; #50ns; out_w1 = ext_mem_rdata;
+        ext_mem_addr = 10'd514; #50ns; out_w2 = ext_mem_rdata;
+        ext_mem_addr = 10'd515; #50ns; out_w3 = ext_mem_rdata;
         ext_mem_en = 1'b0;
 
         $display("[INFO] Saida AES: %08h %08h %08h %08h", out_w0, out_w1, out_w2, out_w3);
