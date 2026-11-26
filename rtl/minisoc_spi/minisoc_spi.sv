@@ -56,12 +56,23 @@ module minisoc_spi (
         end
     end
 
-    // Atualização e deslocamento do MISO na borda de descida de spi_sclk (MSB-first)
-    always_ff @(negedge spi_sclk or negedge rst_n) begin
+    // Captura reg_rdata_i no domínio clk quando reg_rd_en_o é assertado
+    logic [39:0] tx_latch_q;
+
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            tx_latch_q <= '0;
+        end else if (reg_rd_en_o) begin
+            tx_latch_q <= {8'h00, reg_rdata_i};
+        end
+    end
+
+    // Carrega tx_shift_reg ao desativar CS (posedge spi_cs_n) e desloca MSB-first em negedge spi_sclk
+    always_ff @(negedge spi_sclk or posedge spi_cs_n or negedge rst_n) begin
         if (!rst_n) begin
             tx_shift_reg <= '0;
         end else if (spi_cs_n) begin
-            tx_shift_reg <= {8'h00, reg_rdata_i};
+            tx_shift_reg <= tx_latch_q;
         end else begin
             tx_shift_reg <= {tx_shift_reg[38:0], 1'b0};
         end
